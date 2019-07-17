@@ -3,11 +3,11 @@ import { BAD_REQUEST } from 'http-status';
 
 export default ( error: GraphQLError ) =>
 {
-    const originalError = error.originalError as any;
+    const { name = error.name, statusCode = BAD_REQUEST } = error.extensions.exception;
 
     return {
-        message:    error.message,
-        code:       originalError ? error.originalError.name : error.name,
-        statusCode: originalError && originalError.statusCode ? originalError.statusCode : BAD_REQUEST
+        message: error.message,
+        name,
+        statusCode
     };
 }

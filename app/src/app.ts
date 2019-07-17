@@ -1,42 +1,47 @@
-import * as express from 'express';
-import { Application } from 'express';
-import * as helmet from 'helmet';
-import * as morgan from 'morgan';
+import { ApolloServer } from 'apollo-server';
+import { ApolloGateway } from '@apollo/gateway';
+import errorFormatter from './graphql/errorFormatter';
 import events from './events';
-import { Server } from 'http';
-import * as cors from 'cors';
 import AppConfig from './types/AppConfig';
-import * as requestIp from 'request-ip';
 
 export type BootstrapResult = {
-    app: Application;
-    server: Server;
+    server: ApolloServer;
+    url: string;
 }
 
-const app = express();
-export const server = new Server( app );
-
-export const bootstrap = ( appConfig: AppConfig ): Promise<BootstrapResult> =>
+export const bootstrap = ( config: AppConfig ): Promise<BootstrapResult> =>
 {
-    return new Promise( resolve =>
+    return new Promise( async ( resolve ) =>
     {
-        app.use( helmet() );
-        app.use( morgan( process.env.NODE_ENV === 'development' ? 'dev' : 'prod' ) );
-        app.use( cors( appConfig.cors ) );
-        app.use( requestIp.mw() );
+        const port = process.env.PORT;
+        const url = process.env.SERVER_URL;
 
-        app.set( 'config', appConfig );
+        events.emit( 'app.server.beforeGateway', config );
 
-        server.listen( process.env.PORT, () =>
+        const gateway = new ApolloGateway( {
+            serviceList: [
+                {
+                    name: 'users',
+                    url:  `${ url }:${ process.env.USERS_PORT }/graphql`
+                }
+            ]
+        } );
+
+        const { schema, executor } = await gateway.load();
+
+        const server = new ApolloServer( {
+            schema,
+            executor,
+            formatError: errorFormatter
+        } );
+
+        server.listen( { port } ).then( ( { url } ) =>
         {
-            console.log( 'Server started on port', process.env.PORT );
+            console.log( `Server ready at ${ url }` );
 
-            events.emit( 'app.serverStarted', app, server );
+            events.emit( 'app.server.started', server );
 
-            resolve( { app, server } );
+            resolve( { server, url } );
         } );
     } );
 };
-
-
-export default app;

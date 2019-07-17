@@ -4,8 +4,12 @@ import getUser from './getUser';
 import getUsers from './getUsers';
 
 export default {
-    updateUser,
-    createUser,
-    getUser,
-    getUsers
+    Query:    {
+        getUser,
+        getUsers
+    },
+    Mutation: {
+        updateUser,
+        createUser,
+    }
 }

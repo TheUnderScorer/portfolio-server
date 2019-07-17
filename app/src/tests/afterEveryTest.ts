@@ -1,13 +1,8 @@
-import { Application } from 'express';
-import { Connection } from 'typeorm';
-import { entities } from '../db';
+import { connection, entities } from '../db';
 
-export default async ( app: Application ) =>
+export default async () =>
 {
     console.log( 'Performing cleanup after test...' );
-
-    // Drop database after every test
-    const connection = app.get( 'connection' ) as Connection;
 
     for ( let entity of entities ) {
 

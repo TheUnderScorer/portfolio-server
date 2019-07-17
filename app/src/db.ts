@@ -1,11 +1,13 @@
 import events from './events';
-import { Application } from 'express';
-import { createConnection } from 'typeorm';
+import { Connection, createConnection } from 'typeorm';
 import User from './services/user/models/User';
+import { ApolloServer } from 'apollo-server';
 
 export const entities = [ User ];
 
-events.on( 'app.serverStarted', ( app: Application ) =>
+export let connection: Connection;
+
+events.on( 'app.server.started', ( server: ApolloServer ) =>
 {
     createConnection( {
         type:            'mongodb',
@@ -18,13 +20,13 @@ events.on( 'app.serverStarted', ( app: Application ) =>
         entities:        entities,
         synchronize:     true,
         logging:         true,
-    } ).then( ( connection ) =>
+    } ).then( ( conn ) =>
     {
         console.log( 'Connected do database!' );
 
-        app.set( 'connection', connection );
+        connection = conn;
 
-        events.emit( 'app.db.connected', app, connection )
+        events.emit( 'app.db.connected', conn )
     } ).catch( err =>
     {
         console.error( 'Error while connecting to database:', err );

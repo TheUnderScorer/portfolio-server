@@ -3,7 +3,7 @@ import { getUser } from '../authorization';
 import { canViewOtherUsers } from '../permissions';
 import User from '../../models/User';
 
-export default async ( { id }, request: Request ) =>
+export default async ( parent, { id }, request: Request ) =>
 {
     const user = await getUser( request );
 

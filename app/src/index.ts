@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import { exceptionHandler, rejectionHandler } from './common/errorHandlers';
 import * as dotenv from 'dotenv';
 import { bootstrap } from './app';
-import appConfig from './config/appConfig';
 import './app';
 import './db';
 import './services/user';
+import appConfig from './config/appConfig';
 
 if ( process.env.NODE_ENV === 'development' ) {
     dotenv.config( {

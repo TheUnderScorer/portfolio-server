@@ -1,20 +1,24 @@
 import * as supertest from 'supertest';
 import { SuperTest } from 'supertest';
 import { bootstrap } from '../app';
-import appConfig from '../config/appConfig';
 import * as dotenv from 'dotenv';
 import * as Path from 'path';
 import events from '../events';
-import { Application } from 'express';
-import { Server } from 'http';
+import { ApolloServer } from 'apollo-server';
+import '../db';
+import AppConfig from '../types/AppConfig';
+import getContext from '../graphql/getContext';
 
 type SetupTestsResult = {
     api: SuperTest<supertest.Test>;
-    app: Application;
-    server: Server;
+    server: ApolloServer;
 }
 
-export default (): Promise<SetupTestsResult> =>
+export const testsConfig: AppConfig = {
+    contextProvider: getContext()
+};
+
+export default ( config: AppConfig = testsConfig ): Promise<SetupTestsResult> =>
 {
     return new Promise( async resolve =>
     {
@@ -24,13 +28,10 @@ export default (): Promise<SetupTestsResult> =>
             path: Path.join( __dirname, '../../.tests.env' )
         } );
 
-        require( '../app' );
-        require( '../db' );
+        const { server, url } = await bootstrap( config );
+        const api = supertest( url );
 
-        const { app, server } = await bootstrap( appConfig );
-        const api = supertest( server );
-
-        events.on( 'app.db.connected', () => resolve( { api, app, server } ) );
+        events.on( 'app.db.connected', () => resolve( { api, server } ) );
     } );
 
 }

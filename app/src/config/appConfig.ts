@@ -1,8 +1,8 @@
 import AppConfig from '../types/AppConfig';
-import corsConfig from './corsConfig';
+import getContext from '../graphql/getContext';
 
 const appConfig: AppConfig = {
-    cors: corsConfig
+    contextProvider: getContext(),
 };
 
 export default appConfig;

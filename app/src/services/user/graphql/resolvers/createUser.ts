@@ -1,17 +1,16 @@
-import { Request } from 'express';
 import { canCreateUser } from '../authorization';
 import User from '../../models/User';
-import * as moment from 'moment';
+import { Request } from 'express';
+import * as requestIp from 'request-ip';
 
-export default async ( { user: input = {} }, request: Request ) =>
+export default async ( parent, { user: input }, request: Request ) =>
 {
     await canCreateUser( request );
 
     const user = User.create( input );
+    user.ip = requestIp.getClientIp( request );
 
-    user.ip = request.clientIp;
-    user.lastLogin = moment();
-
+    await user.updateLastLogin();
     await user.save();
 
     const token = user.createToken();

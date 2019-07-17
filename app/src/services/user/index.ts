@@ -1,22 +1,27 @@
 import events from '../../events';
-import { Application, Router } from 'express';
+import { ApolloServer } from 'apollo-server';
+import { buildFederatedSchema } from '@apollo/federation';
 import schema from './graphql/schema';
-import * as ExpressGraphQL from 'express-graphql';
-import errorFormatter from '../../graphql/errorFormatter';
 import resolvers from './graphql/resolvers';
+import AppConfig from '../../types/AppConfig';
 
-const loadService = async ( app: Application ) =>
+const loadService = async ( config: AppConfig ) =>
 {
-    const router = Router();
+    const server = new ApolloServer( {
+        context: config.contextProvider,
+        schema:  buildFederatedSchema( [
+                {
+                    typeDefs: schema,
+                    resolvers
+                }
+            ],
+        )
+    } );
 
-    router.use( '/graphql', [], ExpressGraphQL( {
-        schema:              schema,
-        rootValue:           resolvers,
-        graphiql:            true,
-        customFormatErrorFn: errorFormatter
-    } ) );
-
-    app.use( '/users', router );
+    server.listen( { port: process.env.USERS_PORT } ).then( ( { url } ) =>
+    {
+        console.log( `Users service ready at ${ url }` );
+    } );
 };
 
-events.on( 'app.db.connected', loadService );
+events.on( 'app.server.beforeGateway', loadService );

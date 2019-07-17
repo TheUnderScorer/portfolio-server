@@ -2,7 +2,7 @@ import { Request } from 'express';
 import User from '../../models/User';
 import { canModifyUser, getUser } from '../authorization';
 
-export default async ( { id, user: input = {} }, request: Request ) =>
+export default async ( parent, { id, user: input = {} }, request: Request ) =>
 {
     const currentUser = await getUser( request );
     let user = await User.findOne( id );

@@ -1,6 +1,6 @@
-import { CorsOptions } from 'cors';
+import { ContextFunction } from 'apollo-server-core';
 
 export default interface AppConfig
 {
-    cors: CorsOptions;
+    contextProvider: ContextFunction
 }
