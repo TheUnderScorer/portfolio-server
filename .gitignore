@@ -1,5 +1,6 @@
 .idea
 /app/node_modules
 /app/build
+/app/.tests.env
 /app/.dev.env
 /docker

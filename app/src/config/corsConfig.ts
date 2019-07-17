@@ -5,7 +5,7 @@ const corsConfig: CorsOptions = {
     origin:               ( origin, callback ) =>
                           {
 
-                              if ( process.env.NODE_ENV === 'development' ) {
+                              if ( [ 'development', 'tests' ].includes( process.env.NODE_ENV ) ) {
                                   callback( null, true );
 
                                   return;
