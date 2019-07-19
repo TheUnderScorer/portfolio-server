@@ -1,45 +1,82 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm';
 import { UserRole } from '../types/UserRole';
 import UserInterface from '../types/UserInterface';
 import * as bcrypt from 'bcrypt';
 import { DateFormats } from '../../../types/DateFormats';
-import Model from '../../../models/Model';
-import Token from '../types/Token';
 import { sign } from '../../../common/jwt';
 import * as moment from 'moment';
 import { Moment } from 'moment';
+import Model from '../../../models/Model';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Authorized, Field, ID, ObjectType } from 'type-graphql';
+import Conversation from '../../conversations/models/Conversation';
+import TokenInterface from '../types/Token';
+import Token from '../graphql/types/Token';
 
 @Entity()
+@ObjectType()
 export default class User extends Model implements UserInterface
 {
-    @ObjectIdColumn()
-    public id: ObjectID;
+    @PrimaryGeneratedColumn()
+    @Field( () => ID )
+    public id: number;
 
     @Column( {
+        nullable: true,
+    } )
+    @Field( {
         nullable: true,
     } )
     public name: string;
 
     @Column( {
-        nullable: true,
+        nullable:    true,
+        transformer: {
+            from: value => moment( value ),
+            to:   ( value: Moment ) => value.format( DateFormats.DateTime ),
+        },
+        type:        'datetime'
     } )
-    public lastLogin: string;
+    @Field(
+        () => String, {
+            nullable: true,
+        } )
+    public lastLogin: Moment;
 
-    @Column()
+    @Column( {
+        type:   'varchar',
+        length: 20
+    } )
+    @Field( () => String )
     public role: UserRole = 'user';
 
     @Column( {
         nullable: true
     } )
+    @Field( {
+        nullable: true,
+    } )
+    @Authorized( { role: 'administrator' } )
     public password: string;
 
     @Column()
+    @Field()
+    @Authorized( { role: 'administrator' } )
     public ip: string;
 
     @Column( {
         nullable: true
     } )
+    @Field( {
+        nullable: true,
+    } )
     public email: string;
+
+    @OneToMany(
+        () => Conversation,
+        Conversation => Conversation.author
+    )
+    @Field( () => [ Conversation ], { nullable: true } )
+    public conversations: Promise<Conversation[]>;
 
     @BeforeUpdate()
     @BeforeInsert()
@@ -57,22 +94,23 @@ export default class User extends Model implements UserInterface
         return bcrypt.compareSync( password, this.password );
     }
 
-    public createToken(): Token
+    @Field( () => Token, { nullable: true } )
+    public get token(): Token
+    {
+        return this.createToken();
+    }
+
+    public createToken(): TokenInterface
     {
         return sign( {
             id: this.id.toString()
         } )
     }
 
-    public getLastLogin(): Moment
-    {
-        return moment( this.lastLogin );
-    }
-
     @BeforeInsert()
     public async updateLastLogin(): Promise<void>
     {
-        this.lastLogin = moment().format( DateFormats.DateTime );
+        this.lastLogin = moment();
     }
 
     public toJSON(): any

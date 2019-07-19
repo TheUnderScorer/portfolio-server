@@ -7,15 +7,17 @@ import events from '../events';
 import { ApolloServer } from 'apollo-server';
 import '../db';
 import AppConfig from '../types/AppConfig';
-import getContext from '../graphql/getContext';
+import appConfig from '../config/appConfig';
+import { GraphQLSchema } from 'graphql';
 
 type SetupTestsResult = {
     api: SuperTest<supertest.Test>;
     server: ApolloServer;
+    schema: GraphQLSchema;
 }
 
 export const testsConfig: AppConfig = {
-    contextProvider: getContext()
+    ...appConfig,
 };
 
 export default ( config: AppConfig = testsConfig ): Promise<SetupTestsResult> =>
@@ -28,10 +30,10 @@ export default ( config: AppConfig = testsConfig ): Promise<SetupTestsResult> =>
             path: Path.join( __dirname, '../../.tests.env' )
         } );
 
-        const { server, url } = await bootstrap( config );
-        const api = supertest( url );
+        const { server, serverInfo, schema } = await bootstrap( config );
+        const api = supertest( serverInfo.url );
 
-        events.on( 'app.db.connected', () => resolve( { api, server } ) );
+        events.on( 'app.db.connected', () => resolve( { api, server, schema } ) );
     } );
 
 }

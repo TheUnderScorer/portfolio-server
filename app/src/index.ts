@@ -4,7 +4,6 @@ import * as dotenv from 'dotenv';
 import { bootstrap } from './app';
 import './app';
 import './db';
-import './services/user';
 import appConfig from './config/appConfig';
 
 if ( process.env.NODE_ENV === 'development' ) {

@@ -1,12 +1,15 @@
 version: '3.1'
 
 services:
-
-  mongodb:
-    image: bitnami/mongodb:latest
+  mariadb:
+    image: mariadb:latest
     environment:
-      - MONGODB_DATABASE=portfolio
-      - MONGODB_USERNAME=user
-      - MONGODB_PASSWORD=pass
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: portfolio
+      MYSQL_USER: user
+      MYSQL_PASSWORD: pass
+    restart: always
+    volumes:
+      - ./docker/config:/etc/mysql/conf.d
     ports:
-      - 27017:27017
+      - 3306:3306
