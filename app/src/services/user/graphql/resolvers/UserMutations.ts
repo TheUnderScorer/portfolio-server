@@ -26,7 +26,7 @@ export default class UserResolver
 
         await user.save();
 
-        //loaders.users.prime( user.id.toString(), user );
+        loaders.users.prime( user.id.toString(), user );
 
         events.emit( 'app.users.userCreated', user, { req, loaders } );
 
