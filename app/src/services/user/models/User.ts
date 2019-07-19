@@ -11,6 +11,8 @@ import { Authorized, Field, ID, ObjectType } from 'type-graphql';
 import Conversation from '../../conversations/models/Conversation';
 import TokenInterface from '../types/Token';
 import Token from '../graphql/types/Token';
+import Message from '../../conversations/models/Message';
+import { momentTransformer } from '../../../common/typeorm/transformers';
 
 @Entity()
 @ObjectType()
@@ -30,10 +32,7 @@ export default class User extends Model implements UserInterface
 
     @Column( {
         nullable:    true,
-        transformer: {
-            from: value => moment( value ),
-            to:   ( value: Moment ) => value.format( DateFormats.DateTime ),
-        },
+        transformer: momentTransformer,
         type:        'datetime'
     } )
     @Field(
@@ -77,6 +76,13 @@ export default class User extends Model implements UserInterface
     )
     @Field( () => [ Conversation ], { nullable: true } )
     public conversations: Promise<Conversation[]>;
+
+    @OneToMany(
+        () => Message,
+        Message => Message.author
+    )
+    @Field( () => [ Message ] )
+    public messages: Promise<Message[]>;
 
     @BeforeUpdate()
     @BeforeInsert()

@@ -7,6 +7,7 @@ import User from '../services/user/models/User';
 import Conversation from '../services/conversations/models/Conversation';
 import UserMutations from '../services/user/graphql/resolvers/UserMutations';
 import ConversationMutations from '../services/conversations/graphql/resolvers/ConversationMutations';
+import Message from '../services/conversations/models/Message';
 
 const appConfig: AppConfig = {
     contextProvider: getContext(),
@@ -16,7 +17,7 @@ const appConfig: AppConfig = {
     authActions:     {
         [ Actions.CreateUser ]: canCreateUser,
     },
-    entities:        [ User, Conversation ]
+    entities:        [ User, Conversation, Message ]
 };
 
 export default appConfig;

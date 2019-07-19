@@ -8,7 +8,4 @@ export default class ConversationInput implements Partial<Conversation>
     @Field( { nullable: true } )
     public title: string;
 
-    @Field()
-    public authorID: number;
-
 }
