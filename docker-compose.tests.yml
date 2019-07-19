@@ -11,5 +11,6 @@ services:
     restart: always
     volumes:
       - ./docker/config:/etc/mysql/conf.d
+      - ./.docker/mariadb_tests:/var/lib/mysql
     ports:
       - 3306:3306

@@ -46,7 +46,7 @@ export default class User extends Model implements UserInterface
         length: 20
     } )
     @Field( () => String )
-    public role: UserRole = 'user';
+    public role: UserRole = UserRole.user;
 
     @Column( {
         nullable: true

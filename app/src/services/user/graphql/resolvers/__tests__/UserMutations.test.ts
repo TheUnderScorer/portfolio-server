@@ -1,14 +1,17 @@
-import setupTests, { testsConfig } from '../../../../tests/setupTests';
-import afterEveryTest from '../../../../tests/afterEveryTest';
-import createMany from '../../../../tests/factories/createMany';
-import userFactory from '../../../../tests/factories/userFactory';
-import User from '../../models/User';
-import { ErrorCodes } from '../../../../types/ErrorCodes';
+import setupTests, { testsConfig } from '../../../../../tests/setupTests';
+import afterEveryTest from '../../../../../tests/afterEveryTest';
+import userFactory from '../../../../../tests/factories/userFactory';
+import User from '../../../models/User';
+import { ErrorCodes } from '../../../../../types/ErrorCodes';
 import { ApolloServer } from 'apollo-server';
-import { HEADER_TOKEN_KEY } from '../../../../constants/request';
-import { loaders } from '../../../../graphql/getContext';
+import { HEADER_TOKEN_KEY } from '../../../../../constants/request';
+import { loaders } from '../../../../../graphql/getContext';
 import { graphql, GraphQLSchema } from 'graphql';
-import UserInterface from '../../types/UserInterface';
+import UserInterface from '../../../types/UserInterface';
+import * as faker from 'faker';
+import UserInput from '../../inputs/UserInput';
+import { UserRole } from '../../../types/UserRole';
+import createMany from '../../../../../tests/factories/createMany';
 
 describe( 'graphql users resolvers', () =>
 {
@@ -16,11 +19,13 @@ describe( 'graphql users resolvers', () =>
     let user: User;
     let schema: GraphQLSchema;
 
+    const ip = '::ffff:127.0.0.1';
+
     const config = { ...testsConfig };
     config.contextProvider = () => ( {
         req: {
             headers:    {
-                'X-Client-IP':        '::ffff:127.0.0.1',
+                'X-Client-IP':        ip,
                 [ HEADER_TOKEN_KEY ]: user ? user.createToken().value : '',
             },
             header( key: string )
@@ -28,7 +33,7 @@ describe( 'graphql users resolvers', () =>
                 return this.headers[ key ];
             },
             connection: {
-                remoteAddress: '::ffff:127.0.0.1'
+                remoteAddress: ip
             }
         },
         loaders
@@ -89,9 +94,13 @@ describe( 'graphql users resolvers', () =>
 
     it( 'createUser mutation should return error if IP limit have been exceeded', async () =>
     {
-        const users = await createMany( parseInt( process.env.ACCOUNTS_PER_IP ), userFactory, {
-            ip: '::ffff:127.0.0.1'
-        } );
+        await createMany(
+            parseInt( process.env.ACCOUNTS_PER_IP ),
+            userFactory,
+            {
+                ip
+            }
+        );
 
         const mutation = `
             mutation CreateUser($user: UserInput!) {
@@ -106,7 +115,6 @@ describe( 'graphql users resolvers', () =>
                         expires
                     }
                 }
-
             }
         `;
 
@@ -116,7 +124,7 @@ describe( 'graphql users resolvers', () =>
             contextValue:   config.contextProvider( {} ),
             variableValues: {
                 user: {
-                    name: 'John'
+                    name: 'John',
                 }
             },
         } );
@@ -126,56 +134,15 @@ describe( 'graphql users resolvers', () =>
         expect( errors[ 0 ].originalError.name ).toEqual( ErrorCodes.AccountLimitExceeded );
     } );
 
-    /*it( 'getUsers', async () =>
+    it( 'updateMe mutation', async () =>
     {
-        const users = await createMany( 14, userFactory );
-
-        const query = gql`
-            {
-                getUsers(page: 1, perPage: 15) {
-                    id,
-                    ip,
-                    name,
-                    lastLogin
-                }
-            }
-        `;
-
-        const res = await client.query( {
-            query
-        } );
-
-        const mapID = ( { id }: User ) =>
-        {
-            return id.toString();
-        };
-
-        const fetchedUsers = res.data.getUsers as User[];
-        const fetchedUsersIDs = fetchedUsers.map( mapID );
-
-        users.push( user );
-
-        const usersToCheck = users.map( mapID );
-
-        expect( users ).toHaveLength( 15 );
-
-        usersToCheck.forEach( userID =>
-        {
-            expect( fetchedUsersIDs ).toContain( userID );
-        } );
-    } );
-
-    it( 'updateUser mutation', async () =>
-    {
-        const mutation = gql`
-            mutation UpdateUser($id: ID!, $user: UserInput) {
-                updateUser(id: $id, user: $user) {
+        const mutation = `
+            mutation UpdateMe($user: UserInput!) {
+                updateMe(userInput: $user) {
                     id,
                     name,
                     email,
-                    password,
                     role,
-                    ip
                 }
 
             }
@@ -187,18 +154,59 @@ describe( 'graphql users resolvers', () =>
             password: faker.internet.password()
         };
 
-        const res = await client.mutate( {
-            mutation,
-            variables: {
-                id:   user.id.toString(),
+        const res = await graphql( {
+            schema,
+            source:         mutation,
+            variableValues: {
                 user: input
             },
+            contextValue:   config.contextProvider( {} )
+        } );
+
+        const result = res.data.updateMe as UserInterface;
+
+        expect( result.email ).toEqual( input.email );
+        expect( result.name ).toEqual( input.name );
+    } );
+
+    it( 'updateUser mutation', async () =>
+    {
+        user.role = UserRole.administrator;
+        await user.save();
+
+        const targetUser = await userFactory();
+
+        const mutation = `
+            mutation UpdateUser($id: ID!, $user: UserInput!) {
+                updateUser(id: $id, userInput: $user) {
+                    id,
+                    name,
+                    email,
+                    role,
+                }
+            }
+        `;
+
+        const input: UserInput = {
+            name:     faker.name.firstName(),
+            email:    faker.internet.email(),
+            password: faker.internet.password()
+        };
+
+        const res = await graphql( {
+            schema,
+            source:         mutation,
+            variableValues: {
+                id:   targetUser.id,
+                user: input
+            },
+            contextValue:   config.contextProvider( {} )
         } );
 
         const result = res.data.updateUser as UserInterface;
 
         expect( result.email ).toEqual( input.email );
         expect( result.name ).toEqual( input.name );
-    } );*/
+    } );
 
 } );
