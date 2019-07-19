@@ -6,10 +6,11 @@ import Message from './Message';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 import { momentTransformer } from '../../../common/typeorm/transformers';
+import ConversationInterface from '../types/ConversationInterface';
 
 @Entity()
 @ObjectType()
-export default class Conversation extends Model
+export default class Conversation extends Model implements ConversationInterface
 {
 
     @PrimaryGeneratedColumn()

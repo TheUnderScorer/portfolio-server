@@ -1,7 +1,6 @@
 import { UserRole } from '../types/UserRole';
 import UserInterface from '../types/UserInterface';
 import * as bcrypt from 'bcrypt';
-import { DateFormats } from '../../../types/DateFormats';
 import { sign } from '../../../common/jwt';
 import * as moment from 'moment';
 import { Moment } from 'moment';
@@ -117,17 +116,6 @@ export default class User extends Model implements UserInterface
     public async updateLastLogin(): Promise<void>
     {
         this.lastLogin = moment();
-    }
-
-    public toJSON(): any
-    {
-        const json = super.toJSON();
-
-        if ( typeof json.lastLogin === 'object' ) {
-            json.lastLogin = json.lastLogin.format( DateFormats.DateTime );
-        }
-
-        return json;
     }
 
 }

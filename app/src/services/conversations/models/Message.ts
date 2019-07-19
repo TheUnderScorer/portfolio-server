@@ -1,14 +1,16 @@
 import Model from '../../../models/Model';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, BeforeUpdate, Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import User from '../../user/models/User';
 import Conversation from './Conversation';
 import { Field, ID, ObjectType } from 'type-graphql';
 import { momentTransformer } from '../../../common/typeorm/transformers';
+import * as moment from 'moment';
 import { Moment } from 'moment';
+import MessageInterface from '../types/MessageInterface';
 
 @Entity()
 @ObjectType()
-export default class Message extends Model
+export default class Message extends Model implements MessageInterface
 {
 
     @PrimaryGeneratedColumn()
@@ -23,7 +25,7 @@ export default class Message extends Model
         }
     )
     @Field( () => User )
-    public author: User;
+    public author: Promise<User>;
 
     @ManyToOne(
         () => Conversation,
@@ -33,26 +35,36 @@ export default class Message extends Model
         }
     )
     @Field( () => Conversation )
-    public conversation: Conversation;
+    public conversation: Promise<Conversation>;
 
     @Column()
     @Field()
     public content: string;
 
     @Column( {
-        type:        'timestamp',
-        transformer: momentTransformer,
-        default:     () => 'CURRENT_TIMESTAMP()'
+        type:        'datetime',
+        transformer: momentTransformer
     } )
-    @Field( () => String )
+    @Field( () => String, { nullable: true } )
     public createdAt: Moment;
 
     @Column( {
-        type:        'timestamp',
-        transformer: momentTransformer,
-        default:     () => 'CURRENT_TIMESTAMP()'
+        type:        'datetime',
+        transformer: momentTransformer
     } )
-    @Field( () => String )
-    public modifiedAt: Moment;
+    @Field( () => String, { nullable: true } )
+    public updatedAt: Moment;
+
+    @BeforeInsert()
+    public setCreateDate(): void
+    {
+        this.createdAt = moment();
+    }
+
+    @BeforeUpdate()
+    public setUpdateDate(): void
+    {
+        this.updatedAt = moment();
+    }
 
 }
