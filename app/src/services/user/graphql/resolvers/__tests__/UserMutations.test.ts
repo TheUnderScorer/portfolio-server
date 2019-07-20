@@ -5,7 +5,7 @@ import User from '../../../models/User';
 import { ErrorCodes } from '../../../../../types/ErrorCodes';
 import { ApolloServer } from 'apollo-server';
 import { HEADER_TOKEN_KEY } from '../../../../../constants/request';
-import { loaders } from '../../../../../graphql/getContext';
+import { createLoaders } from '../../../../../graphql/getContext';
 import { graphql, GraphQLSchema } from 'graphql';
 import UserInterface from '../../../types/UserInterface';
 import * as faker from 'faker';
@@ -23,7 +23,7 @@ describe( 'graphql users resolvers', () =>
 
     const config = { ...testsConfig };
     config.contextProvider = () => ( {
-        req: {
+        req:     {
             headers:    {
                 'X-Client-IP':        ip,
                 [ HEADER_TOKEN_KEY ]: user ? user.createToken().value : '',
@@ -36,7 +36,7 @@ describe( 'graphql users resolvers', () =>
                 remoteAddress: ip
             }
         },
-        loaders
+        loaders: createLoaders()
     } );
 
     beforeAll( async () =>

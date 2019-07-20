@@ -3,7 +3,7 @@ import User from '../../../../user/models/User';
 import { graphql, GraphQLSchema } from 'graphql';
 import setupTests, { testsConfig } from '../../../../../tests/setupTests';
 import { HEADER_TOKEN_KEY } from '../../../../../constants/request';
-import { loaders } from '../../../../../graphql/getContext';
+import { createLoaders } from '../../../../../graphql/getContext';
 import userFactory from '../../../../../tests/factories/userFactory';
 import afterEveryTest from '../../../../../tests/afterEveryTest';
 import ConversationInterface from '../../../types/ConversationInterface';
@@ -24,7 +24,7 @@ describe( 'ConversationMutations', () =>
 
     const config = { ...testsConfig };
     config.contextProvider = () => ( {
-        req: {
+        req:     {
             headers:    {
                 'X-Client-IP':        ip,
                 [ HEADER_TOKEN_KEY ]: user ? user.createToken().value : '',
@@ -37,7 +37,7 @@ describe( 'ConversationMutations', () =>
                 remoteAddress: ip
             }
         },
-        loaders
+        loaders: createLoaders()
     } );
 
     beforeAll( async () =>
