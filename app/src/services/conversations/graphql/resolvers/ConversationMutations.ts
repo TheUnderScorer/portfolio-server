@@ -4,6 +4,7 @@ import ConversationInput from '../inputs/ConversationInput';
 import Context from '../../../../types/graphql/Context';
 import events from '../../../../events';
 import { getUser } from '../../../user/graphql/authorization';
+import DeleteConversationResult from '../objects/DeleteConversationResult';
 
 @Resolver( Conversation )
 export default class ConversationMutations
@@ -46,9 +47,35 @@ export default class ConversationMutations
         } );
         conversation = Object.assign( conversation, input );
 
+        loaders.conversations
+            .clear( conversation.id.toString() )
+            .prime( conversation.id.toString(), conversation );
+
         await conversation.save();
 
+        events.emit( 'app.conversations.updated', conversation, { req, loaders } );
+
         return conversation;
+    }
+
+    @Mutation( () => DeleteConversationResult )
+    public async deleteConversation(
+        @Arg( 'id', () => ID ) id: number,
+        @Ctx() { req, loaders }: Context
+    ): Promise<DeleteConversationResult>
+    {
+        const user = await getUser( req, loaders.users );
+
+        const conversation = await Conversation.findOneOrFail( id, {
+            where: {
+                author: user.id
+            }
+        } );
+        await conversation.remove();
+
+        return {
+            result: true,
+        };
     }
 
 }

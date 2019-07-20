@@ -10,6 +10,8 @@ import ConversationInterface from '../../../types/ConversationInterface';
 import ConversationInput from '../../inputs/ConversationInput';
 import * as faker from 'faker';
 import conversationFactory from '../../../../../tests/factories/conversationFactory';
+import Conversation from '../../../models/Conversation';
+import DeleteConversationResult from '../../objects/DeleteConversationResult';
 
 describe( 'ConversationMutations', () =>
 {
@@ -132,5 +134,32 @@ describe( 'ConversationMutations', () =>
 
         expect( title ).toEqual( input.title );
     } );
+
+    it( 'deleteConversation mutation', async () =>
+    {
+        const conversation = await conversationFactory( { author: user } );
+
+        const mutation = `
+            mutation DeleteConversation($id: ID!) {
+                deleteConversation(id: $id) {
+                    result,
+                }
+            }
+        `;
+
+        const res = await graphql( {
+            schema,
+            source:         mutation,
+            contextValue:   config.contextProvider( {} ),
+            variableValues: {
+                id: conversation.id,
+            }
+        } );
+
+        const { result } = res.data.deleteConversation as DeleteConversationResult;
+
+        expect( result ).toBeTruthy();
+        expect( await Conversation.findOne( conversation.id ) ).toBeUndefined();
+    } )
 
 } );
