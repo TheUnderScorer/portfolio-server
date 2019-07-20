@@ -1,10 +1,10 @@
 import Conversation from '../../models/Conversation';
-import { Arg, Ctx, ID, Mutation, Resolver } from 'type-graphql';
+import { Arg, Ctx, ID, Mutation, Publisher, PubSub, Resolver } from 'type-graphql';
 import ConversationInput from '../inputs/ConversationInput';
 import Context from '../../../../types/graphql/Context';
-import events from '../../../../events';
 import { getUser } from '../../../user/graphql/authorization';
 import DeleteConversationResult from '../objects/DeleteConversationResult';
+import { Subscriptions } from '../../../../types/graphql/Subscriptions';
 
 @Resolver( Conversation )
 export default class ConversationMutations
@@ -12,7 +12,8 @@ export default class ConversationMutations
     @Mutation( () => Conversation )
     public async createConversation(
         @Arg( 'conversationInput' ) { title }: ConversationInput,
-        @Ctx() { req, loaders }: Context
+        @Ctx() { req, loaders }: Context,
+        @PubSub( Subscriptions.NewConversation ) publish: Publisher<Conversation>
     ): Promise<Conversation>
     {
         const author = await getUser( req, loaders.users );
@@ -26,7 +27,7 @@ export default class ConversationMutations
 
         loaders.conversations.prime( conversation.id.toString(), conversation );
 
-        events.emit( 'app.conversations.created', conversation, { req, loaders } );
+        await publish( conversation );
 
         return conversation;
     }
@@ -35,7 +36,8 @@ export default class ConversationMutations
     public async updateConversation(
         @Arg( 'id', () => ID ) id: number,
         @Arg( 'conversationInput' ) input: ConversationInput,
-        @Ctx() { req, loaders }: Context
+        @Ctx() { req, loaders }: Context,
+        @PubSub( Subscriptions.ConversationUpdated ) publish: Publisher<Conversation>
     ): Promise<Conversation>
     {
         const user = await getUser( req, loaders.users );
@@ -53,7 +55,7 @@ export default class ConversationMutations
 
         await conversation.save();
 
-        events.emit( 'app.conversations.updated', conversation, { req, loaders } );
+        await publish( conversation );
 
         return conversation;
     }
@@ -61,7 +63,8 @@ export default class ConversationMutations
     @Mutation( () => DeleteConversationResult )
     public async deleteConversation(
         @Arg( 'id', () => ID ) id: number,
-        @Ctx() { req, loaders }: Context
+        @Ctx() { req, loaders }: Context,
+        @PubSub( Subscriptions.ConversationDeleted ) publish: Publisher<Conversation>
     ): Promise<DeleteConversationResult>
     {
         const user = await getUser( req, loaders.users );
@@ -71,6 +74,9 @@ export default class ConversationMutations
                 author: user.id
             }
         } );
+
+        await publish( conversation );
+
         await conversation.remove();
 
         return {

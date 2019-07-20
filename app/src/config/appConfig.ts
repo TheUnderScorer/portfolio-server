@@ -8,11 +8,13 @@ import Conversation from '../services/conversations/models/Conversation';
 import UserMutations from '../services/user/graphql/resolvers/UserMutations';
 import ConversationMutations from '../services/conversations/graphql/resolvers/ConversationMutations';
 import Message from '../services/conversations/models/Message';
+import ConversationQueries from '../services/conversations/graphql/resolvers/ConversationQueries';
+import ConversationSubscriptions from '../services/conversations/graphql/resolvers/ConversationSubscriptions';
 
 const appConfig: AppConfig = {
     contextProvider: getContext(),
     schemaOptions:   {
-        resolvers: [ UserQueries, UserMutations, ConversationMutations ]
+        resolvers: [ UserQueries, UserMutations, ConversationMutations, ConversationQueries, ConversationSubscriptions ]
     },
     authActions:     {
         [ Actions.CreateUser ]: canCreateUser,

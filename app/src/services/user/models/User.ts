@@ -9,7 +9,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGenerated
 import { Authorized, Field, ID, ObjectType } from 'type-graphql';
 import Conversation from '../../conversations/models/Conversation';
 import TokenInterface from '../types/Token';
-import Token from '../graphql/types/Token';
+import Token from '../graphql/objects/Token';
 import Message from '../../conversations/models/Message';
 import { momentTransformer } from '../../../common/typeorm/transformers';
 

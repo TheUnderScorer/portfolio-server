@@ -7,9 +7,11 @@ import { Request } from 'express';
 export default interface Context
 {
     req: Request;
-    loaders: {
-        users: DataLoader<string, User>;
-        conversations: DataLoader<string, Conversation>;
-        messages: DataLoader<string, Message>;
-    }
+    loaders: ContextLoaders
 }
+
+export type ContextLoaders = {
+    users: DataLoader<string, User>;
+    conversations: DataLoader<string, Conversation>;
+    messages: DataLoader<string, Message>;
+};

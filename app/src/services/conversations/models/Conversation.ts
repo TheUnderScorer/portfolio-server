@@ -39,7 +39,7 @@ export default class Conversation extends Model implements ConversationInterface
         () => Message,
         Message => Message.conversation
     )
-    @Field( () => [ Message ] )
+    @Field( () => [ Message ], { nullable: true } )
     public messages: Promise<Message[]>;
 
     @Column( {
