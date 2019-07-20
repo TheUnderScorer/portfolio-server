@@ -2,8 +2,9 @@ import { UserRole } from './UserRole';
 import { Moment } from 'moment';
 import ConversationInterface from '../../conversations/types/ConversationInterface';
 import MessageInterface from '../../conversations/types/MessageInterface';
+import ModelInterface from '../../../types/ModelInterface';
 
-export default interface UserInterface
+export default interface UserInterface extends ModelInterface
 {
     name: string;
     email: string;

@@ -12,7 +12,7 @@ export type UserFactory = {
 const userFactory = async (
     {
         name = faker.name.firstName(),
-        role = 'user',
+        role = UserRole.user,
         password = faker.internet.password(),
         ip = faker.internet.ip()
     }: UserFactory = {}
