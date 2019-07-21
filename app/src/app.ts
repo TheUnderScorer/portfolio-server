@@ -28,12 +28,13 @@ export const bootstrap = ( config: AppConfig ): Promise<BootstrapResult> =>
         const server = new ApolloServer( {
             schema,
             formatError: errorFormatter,
-            context:     config.contextProvider
+            context:     config.contextProvider,
         } );
 
         server.listen( { port } ).then( ( serverInfo ) =>
         {
             console.log( `Server ready at ${ serverInfo.url }` );
+            console.log( `Subscriptions ready at ws://localhost:${ port }${ server.subscriptionsPath }` );
 
             events.emit( 'app.server.started', config, server, serverInfo );
 

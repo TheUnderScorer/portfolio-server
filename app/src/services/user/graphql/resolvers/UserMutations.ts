@@ -30,7 +30,7 @@ export default class UserResolver
     @Mutation( () => User )
     @Authorized( { action: Actions.CreateUser } )
     public async createUser(
-        @Arg( 'userInput' ) userInput: UserInput,
+        @Arg( 'userInput', { nullable: true } ) userInput: UserInput = {},
         @Ctx() { req, loaders }: Context ): Promise<User>
     {
         const user = User.create( {

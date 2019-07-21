@@ -60,9 +60,18 @@ export default class UserQueries
     }
 
     @FieldResolver( () => [ Conversation ] )
-    public async conversations( @Root() user: User, @Ctx() { loaders }: Context ): Promise<Conversation[]>
+    public async conversations(
+        @Root() user: User,
+        @Args() { perPage = 15, page = 1 }: PaginationArgs,
+        @Ctx() { loaders }: Context ): Promise<Conversation[]>
     {
-        const conversations = await user.conversations;
+        const conversations = await Conversation.find( {
+            where: {
+                author: user.id
+            },
+            take:  perPage,
+            skip:  getOffset( page, perPage )
+        } );
 
         loadMany(
             conversations,

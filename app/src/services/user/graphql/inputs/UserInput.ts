@@ -1,6 +1,6 @@
 import { Field, InputType } from 'type-graphql';
 import User from '../../models/User';
-import { IsEmail, MinLength } from 'class-validator';
+import { MinLength } from 'class-validator';
 
 @InputType()
 export default class UserInput implements Partial<User>
@@ -8,17 +8,16 @@ export default class UserInput implements Partial<User>
     @Field( {
         nullable: true,
     } )
-    public name: string;
+    public name?: string;
 
     @Field( {
         nullable: true,
     } )
-    @IsEmail()
-    public email: string;
+    public email?: string;
 
     @Field( {
         nullable: true,
     } )
     @MinLength( 5 )
-    public password: string;
+    public password?: string;
 }
