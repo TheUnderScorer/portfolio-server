@@ -5,5 +5,6 @@ export enum ErrorCodes
     InvalidRoutePath     = 'InvalidRoutePath',
     InvalidToken         = 'InvalidToken',
     AccountLimitExceeded = 'AccountLimitExceeded',
-    CannotEditUser       = 'CannotEditUser'
+    CannotEditUser       = 'CannotEditUser',
+    NoEmailProvided      = 'NoEmailProvided'
 }

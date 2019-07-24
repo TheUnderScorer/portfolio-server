@@ -12,6 +12,8 @@ import TokenInterface from '../types/Token';
 import Token from '../graphql/objects/Token';
 import Message from '../../conversations/models/Message';
 import { momentTransformer } from '../../../common/typeorm/transformers';
+import ContactInterface from '../../contact/types/ContactInterface';
+import Contact from '../../contact/models/Contact';
 
 @Entity()
 @ObjectType()
@@ -80,8 +82,15 @@ export default class User extends Model implements UserInterface
         () => Message,
         Message => Message.author
     )
-    @Field( () => [ Message ] )
+    @Field( () => [ Message ], { nullable: true } )
     public messages: Promise<Message[]>;
+
+    @OneToMany(
+        () => Contact,
+        Contact => Contact.user
+    )
+    @Field( () => [ Contact ], { nullable: true } )
+    public contacts: Promise<ContactInterface[]>;
 
     @BeforeUpdate()
     @BeforeInsert()

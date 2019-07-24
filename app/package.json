@@ -87,6 +87,7 @@
     "apollo-server": "^2.7.0",
     "axios": "^0.18.0",
     "bcrypt": "^3.0.5",
+    "class-validator": "^0.9.1",
     "cors": "^2.8.5",
     "dataloader": "^1.4.0",
     "dotenv": "^7.0.0",

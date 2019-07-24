@@ -3,6 +3,7 @@ import { Moment } from 'moment';
 import ConversationInterface from '../../conversations/types/ConversationInterface';
 import MessageInterface from '../../conversations/types/MessageInterface';
 import ModelInterface from '../../../types/ModelInterface';
+import ContactInterface from '../../contact/types/ContactInterface';
 
 export default interface UserInterface extends ModelInterface
 {
@@ -14,4 +15,5 @@ export default interface UserInterface extends ModelInterface
     ip: string;
     conversations: Promise<ConversationInterface[]>;
     messages: Promise<MessageInterface[]>;
+    contacts: Promise<ContactInterface[]>;
 }
