@@ -27,7 +27,6 @@ let sendEmails: ContactInterface[] = [];
 
 describe( 'ContactMutations', () =>
 {
-
     const config = { ...testsConfig };
     config.contextProvider = () => ( {
         req:     {
@@ -66,13 +65,8 @@ describe( 'ContactMutations', () =>
         sendEmails = []
     } );
 
-    it( 'Should save and send contact via e-mail', async () =>
+    const handleSendMutation = async ( input: ContactInput ) =>
     {
-        const input: ContactInput = {
-            subject: faker.random.word(),
-            content: faker.random.words( 10 )
-        };
-
         const mutation = `
             mutation ContactMutation ($input: ContactInput!) {
                 send(contactInput: $input) {
@@ -81,7 +75,7 @@ describe( 'ContactMutations', () =>
             }
         `;
 
-        const res = await graphql( {
+        return await graphql( {
             schema,
             source:         mutation,
             variableValues: {
@@ -89,10 +83,41 @@ describe( 'ContactMutations', () =>
             },
             contextValue:   config.contextProvider( {} )
         } );
+    };
+
+    it( 'send mutation should save and send contact via e-mail', async () =>
+    {
+        const input: ContactInput = {
+            subject: faker.random.word(),
+            content: faker.random.words( 10 )
+        };
+
+        const res = await handleSendMutation( input );
 
         const { data } = res;
 
         expect( sendEmails[ 0 ].id.toString() ).toEqual( data.send.id.toString() );
-    } )
+    } );
+
+    it( 'send mutation should save provided e-mail address if user does not have one', async () =>
+    {
+        user.email = '';
+        await user.save();
+
+        const input: ContactInput = {
+            subject: faker.random.word(),
+            content: faker.random.words( 10 ),
+            email:   faker.internet.email()
+        };
+
+        const res = await handleSendMutation( input );
+
+        const { data } = res;
+
+        await user.reload();
+
+        expect( sendEmails[ 0 ].id.toString() ).toEqual( data.send.id.toString() );
+        expect( user.email ).toEqual( input.email );
+    } );
 
 } );
