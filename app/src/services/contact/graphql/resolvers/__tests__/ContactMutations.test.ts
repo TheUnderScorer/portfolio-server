@@ -89,7 +89,7 @@ describe( 'ContactMutations', () =>
     {
         const input: ContactInput = {
             subject: faker.random.word(),
-            content: faker.random.words( 10 )
+            message: faker.random.words( 10 )
         };
 
         const res = await handleSendMutation( input );
@@ -106,7 +106,7 @@ describe( 'ContactMutations', () =>
 
         const input: ContactInput = {
             subject: faker.random.word(),
-            content: faker.random.words( 10 ),
+            message: faker.random.words( 10 ),
             email:   faker.internet.email()
         };
 

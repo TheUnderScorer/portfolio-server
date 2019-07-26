@@ -114,6 +114,12 @@ export default class User extends Model implements UserInterface
         return this.createToken();
     }
 
+    @Field()
+    public get hasPassword(): boolean
+    {
+        return !!this.password;
+    }
+
     public createToken(): TokenInterface
     {
         return sign( {

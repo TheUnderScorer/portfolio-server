@@ -6,6 +6,6 @@ export default interface ContactInterface extends ModelInterface
 {
     user: Promise<UserInterface> | UserInterface;
     subject: string;
-    content: string;
+    message: string;
     createdAt: Moment;
 }

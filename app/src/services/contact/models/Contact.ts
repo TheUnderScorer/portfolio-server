@@ -18,7 +18,7 @@ export default class Contact extends Model implements ContactInterface
 
     @Field()
     @Column()
-    public content: string;
+    public message: string;
 
     @Field( () => String )
     @Column( {

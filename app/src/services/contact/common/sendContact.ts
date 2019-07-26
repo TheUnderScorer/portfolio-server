@@ -15,6 +15,6 @@ export default async ( contact: Contact, targetEmail: string = process.env.SITE_
         sender:  user.email,
         subject: contact.subject,
         replyTo: user.email,
-        text:    contact.content
+        text:    contact.message
     } );
 }

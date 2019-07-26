@@ -73,4 +73,13 @@ export default class UserResolver
         return UserResolver.updateUserData( user, userInput, loaders.users );
     }
 
+    @Mutation( () => User )
+    public async updateLoginDate( @Ctx() { req, loaders }: Context ): Promise<User>
+    {
+        const user = await getUser( req, loaders.users );
+        await user.updateLastLogin();
+
+        return user;
+    }
+
 }

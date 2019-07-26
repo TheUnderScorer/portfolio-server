@@ -11,8 +11,9 @@ export default class ContactInput implements Partial<Contact>
     public subject: string;
 
     @MinLength( 20 )
+    @MaxLength( 1000 )
     @Field()
-    public content: string;
+    public message: string;
 
     @Field( {
         nullable:    true,
