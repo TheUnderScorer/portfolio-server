@@ -6,5 +6,6 @@ export enum ErrorCodes
     InvalidToken         = 'InvalidToken',
     AccountLimitExceeded = 'AccountLimitExceeded',
     CannotEditUser       = 'CannotEditUser',
-    NoEmailProvided      = 'NoEmailProvided'
+    NoEmailProvided      = 'NoEmailProvided',
+    EmailSendingError    = 'EmailSendingError'
 }

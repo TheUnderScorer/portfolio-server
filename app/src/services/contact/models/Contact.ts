@@ -44,9 +44,4 @@ export default class Contact extends Model implements ContactInterface
         this.createdAt = moment();
     }
 
-    public async send(): Promise<boolean>
-    {
-        return true;
-    }
-
 }
