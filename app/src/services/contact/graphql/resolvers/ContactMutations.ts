@@ -1,4 +1,4 @@
-import { Arg, Ctx, Mutation, Resolver } from 'type-graphql';
+import { Arg, Authorized, Ctx, Mutation, Resolver } from 'type-graphql';
 import Contact from '../../models/Contact';
 import ContactInput from '../inputs/ContactInput';
 import Context from '../../../../types/graphql/Context';
@@ -7,6 +7,7 @@ import User from '../../../user/models/User';
 import RequestError from '../../../../errors/RequestError';
 import { ErrorCodes } from '../../../../types/ErrorCodes';
 import sendContact from '../../common/sendContact';
+import { Actions } from '../../../../types/graphql/Actions';
 
 @Resolver( Contact )
 export default class ContactMutations
@@ -26,6 +27,7 @@ export default class ContactMutations
         await user.save();
     }
 
+    @Authorized( { action: Actions.SendContact } )
     @Mutation( () => Contact )
     public async send(
         @Arg( 'contactInput' ) { email = '', ...input }: ContactInput,

@@ -5,5 +5,16 @@ import { DateFormats } from '../../types/DateFormats';
 
 export const momentTransformer: ValueTransformer = {
     from: value => value ? moment( value ) : undefined,
-    to:   ( value: Moment ) => value ? value.format( DateFormats.DateTime ) : undefined,
+    to:   ( value: Moment ) =>
+          {
+              if ( !value ) {
+                  return value;
+              }
+
+              if ( !!value.format ) {
+                  return value.format( DateFormats.DateTime );
+              }
+
+              return value;
+          },
 };

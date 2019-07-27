@@ -1,4 +1,5 @@
 export enum Actions
 {
-    CreateUser = 'CreateUser'
+    CreateUser  = 'CreateUser',
+    SendContact = 'SendContact'
 }

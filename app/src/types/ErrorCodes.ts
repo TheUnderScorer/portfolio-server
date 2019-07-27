@@ -7,5 +7,6 @@ export enum ErrorCodes
     AccountLimitExceeded = 'AccountLimitExceeded',
     CannotEditUser       = 'CannotEditUser',
     NoEmailProvided      = 'NoEmailProvided',
-    EmailSendingError    = 'EmailSendingError'
+    EmailSendingError    = 'EmailSendingError',
+    ContactFormOverload  = 'ContactFormOverload'
 }

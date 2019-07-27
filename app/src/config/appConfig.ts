@@ -12,6 +12,7 @@ import ConversationQueries from '../services/conversations/graphql/resolvers/Con
 import ConversationSubscriptions from '../services/conversations/graphql/resolvers/ConversationSubscriptions';
 import Contact from '../services/contact/models/Contact';
 import ContactMutations from '../services/contact/graphql/resolvers/ContactMutations';
+import canSendContact from '../services/contact/graphql/authorization/canSendContact';
 
 const appConfig: AppConfig = {
     contextProvider: getContext(),
@@ -19,7 +20,8 @@ const appConfig: AppConfig = {
         resolvers: [ UserQueries, UserMutations, ConversationMutations, ConversationQueries, ConversationSubscriptions, ContactMutations ]
     },
     authActions:     {
-        [ Actions.CreateUser ]: canCreateUser,
+        [ Actions.CreateUser ]:  canCreateUser,
+        [ Actions.SendContact ]: canSendContact,
     },
     entities:        [ User, Conversation, Message, Contact ]
 };
