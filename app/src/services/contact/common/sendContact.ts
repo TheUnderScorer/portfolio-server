@@ -2,7 +2,7 @@ import Contact from '../models/Contact';
 import Exception from '../../../errors/Exception';
 import { sendEmail } from '../../../common/emails';
 
-export default async ( contact: Contact, targetEmail: string = process.env.SITE_EMAIL ): Promise<boolean> =>
+export default async ( contact: Contact, targetEmail: string = process.env.SITE_EMAIL ): Promise<void> =>
 {
     if ( !targetEmail ) {
         throw new Exception( 'No target email provided.' );
@@ -11,10 +11,10 @@ export default async ( contact: Contact, targetEmail: string = process.env.SITE_
     const user = await contact.user;
 
     return await sendEmail( {
-        from:    process.env.SITE_EMAIL,
+        to:      process.env.DEV_EMAIL,
         sender:  user.email,
         subject: contact.subject,
-        replyTo: user.email,
-        text:    contact.message
+        text:    contact.message,
+        html:    contact.message,
     } );
 }

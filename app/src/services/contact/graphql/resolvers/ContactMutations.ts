@@ -7,7 +7,6 @@ import User from '../../../user/models/User';
 import RequestError from '../../../../errors/RequestError';
 import { ErrorCodes } from '../../../../types/ErrorCodes';
 import sendContact from '../../common/sendContact';
-import { INTERNAL_SERVER_ERROR } from 'http-status';
 
 @Resolver( Contact )
 export default class ContactMutations
@@ -41,14 +40,12 @@ export default class ContactMutations
         contact.user = Promise.resolve( user );
         await contact.save();
 
-        if ( !await sendContact( contact ) ) {
-            await contact.remove();
+        try {
+            await sendContact( contact )
+        } catch ( e ) {
+            contact.remove();
 
-            throw new RequestError(
-                'Error while sending e-mail.',
-                ErrorCodes.EmailSendingError,
-                INTERNAL_SERVER_ERROR
-            )
+            throw e;
         }
 
         return contact;
