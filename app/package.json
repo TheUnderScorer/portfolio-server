@@ -83,18 +83,14 @@
     "typescript": "^3.4.1"
   },
   "dependencies": {
-    "@apollo/gateway": "^0.7.1",
     "apollo-server": "^2.7.0",
     "axios": "^0.18.0",
     "bcrypt": "^3.0.5",
     "class-validator": "^0.9.1",
-    "cors": "^2.8.5",
     "dataloader": "^1.4.0",
     "dotenv": "^7.0.0",
     "express": "^4.16.4",
-    "express-fileupload": "^1.1.5",
     "express-graphql": "^0.8.0",
-    "express-validator": "^5.3.1",
     "faker": "^4.1.0",
     "graphql": "^14.4.2",
     "graphql-fields": "^2.0.3",
@@ -110,7 +106,6 @@
     "mysql2": "^1.6.5",
     "nodemailer": "^6.2.1",
     "sanitize-html": "^1.20.1",
-    "swagger-ui-express": "^4.0.2",
     "type-graphql": "^0.17.4",
     "typeorm": "^0.2.18"
   },
