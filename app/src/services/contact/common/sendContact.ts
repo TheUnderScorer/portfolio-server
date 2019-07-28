@@ -10,11 +10,18 @@ export default async ( contact: Contact, targetEmail: string = process.env.SITE_
 
     const user = await contact.user;
 
+    const userDetails = JSON.stringify( user.toJSON(), null, 2 );
+
     return await sendEmail( {
         to:      process.env.DEV_EMAIL,
+        from:    user.email,
         sender:  user.email,
-        subject: contact.subject,
-        text:    contact.message,
-        html:    contact.message,
+        subject: `New message on your portfolio: ${ contact.subject }`,
+        text:    `
+            ${ contact.message }
+            
+            User details: 
+            ${ userDetails }
+        `,
     } );
 }
