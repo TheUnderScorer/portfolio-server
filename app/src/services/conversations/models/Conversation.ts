@@ -1,12 +1,17 @@
 import Model from '../../../models/Model';
 import { BeforeInsert, Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import User from '../../user/models/User';
-import { Field, ID, ObjectType } from 'type-graphql';
+import { Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import Message from './Message';
 import * as moment from 'moment';
 import { Moment } from 'moment';
 import { momentTransformer } from '../../../common/typeorm/transformers';
-import ConversationInterface from '../types/ConversationInterface';
+import ConversationInterface, { ConversationStatuses } from '../types/ConversationInterface';
+
+registerEnumType( ConversationStatuses, {
+    name:        'ConversationStatuses',
+    description: 'Current status of conversation'
+} );
 
 @Entity()
 @ObjectType()
@@ -48,6 +53,13 @@ export default class Conversation extends Model implements ConversationInterface
     } )
     @Field( () => String, { nullable: true } )
     public createdAt: Moment;
+
+    @Column( {
+        type:   'varchar',
+        length: 7
+    } )
+    @Field( () => ConversationStatuses )
+    public status: ConversationStatuses = ConversationStatuses.open;
 
     @BeforeInsert()
     public setCreateDate()
