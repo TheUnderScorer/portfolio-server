@@ -2,43 +2,23 @@ import { ApolloServer } from 'apollo-server';
 import User from '../../../../user/models/User';
 import { graphql, GraphQLSchema } from 'graphql';
 import setupTests, { testsConfig } from '../../../../../tests/setupTests';
-import { HEADER_TOKEN_KEY } from '../../../../../constants/request';
-import { createLoaders } from '../../../../../graphql/getContext';
 import userFactory from '../../../../../tests/factories/userFactory';
 import afterEveryTest from '../../../../../tests/afterEveryTest';
-import ConversationInterface from '../../../types/ConversationInterface';
+import ConversationInterface, { ConversationStatuses } from '../../../types/ConversationInterface';
 import ConversationInput from '../../inputs/ConversationInput';
 import * as faker from 'faker';
 import conversationFactory from '../../../../../tests/factories/conversationFactory';
 import Conversation from '../../../models/Conversation';
 import DeleteConversationResult from '../../objects/DeleteConversationResult';
+import { contextWithUser } from '../../../../../tests/contextProviders';
 
 describe( 'ConversationMutations', () =>
 {
-
     let server: ApolloServer;
     let user: User;
     let schema: GraphQLSchema;
 
-    const ip = '::ffff:127.0.0.1';
-
     const config = { ...testsConfig };
-    config.contextProvider = () => ( {
-        req:     {
-            headers:    {
-                'X-Client-IP':        ip,
-                [ HEADER_TOKEN_KEY ]: user ? user.createToken().value : '',
-            },
-            header( key: string )
-            {
-                return this.headers[ key ];
-            },
-            connection: {
-                remoteAddress: ip
-            }
-        },
-        loaders: createLoaders()
-    } );
 
     beforeAll( async () =>
     {
@@ -85,7 +65,7 @@ describe( 'ConversationMutations', () =>
         const result = await graphql( {
             schema,
             source:         mutation,
-            contextValue:   config.contextProvider( {} ),
+            contextValue:   contextWithUser( user ),
             variableValues: {
                 input
             }
@@ -122,7 +102,7 @@ describe( 'ConversationMutations', () =>
         const result = await graphql( {
             schema,
             source:         mutation,
-            contextValue:   config.contextProvider( {} ),
+            contextValue:   contextWithUser( user ),
             variableValues: {
                 input,
                 id: conversation.id,
@@ -150,7 +130,7 @@ describe( 'ConversationMutations', () =>
         const res = await graphql( {
             schema,
             source:         mutation,
-            contextValue:   config.contextProvider( {} ),
+            contextValue:   contextWithUser( user ),
             variableValues: {
                 id: conversation.id,
             }
@@ -160,6 +140,34 @@ describe( 'ConversationMutations', () =>
 
         expect( result ).toBeTruthy();
         expect( await Conversation.findOne( conversation.id ) ).toBeUndefined();
-    } )
+    } );
+
+    it( 'changeStatus mutation', async () =>
+    {
+        const conversation = await conversationFactory( { author: user } );
+
+        const mutation = `
+            mutation ChangeStatus($status: ConversationStatuses!, $conversationID: ID!) {
+                changeStatus(status: $status, conversationID: $conversationID){
+                    id,
+                    status
+                }
+            }
+        `;
+
+        await graphql( {
+            schema,
+            source:         mutation,
+            contextValue:   contextWithUser( user ),
+            variableValues: {
+                conversationID: conversation.id,
+                status:         'closed'
+            }
+        } );
+
+        await conversation.reload();
+
+        expect( conversation.status ).toEqual( ConversationStatuses.closed );
+    } );
 
 } );

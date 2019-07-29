@@ -6,7 +6,7 @@ import * as moment from 'moment';
 import { Moment } from 'moment';
 import Model from '../../../models/Model';
 import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { Authorized, Field, ID, ObjectType } from 'type-graphql';
+import { Authorized, Field, ID, ObjectType, registerEnumType } from 'type-graphql';
 import Conversation from '../../conversations/models/Conversation';
 import TokenInterface from '../types/Token';
 import Token from '../graphql/objects/Token';
@@ -14,6 +14,10 @@ import Message from '../../conversations/models/Message';
 import { momentTransformer } from '../../../common/typeorm/transformers';
 import ContactInterface from '../../contact/types/ContactInterface';
 import Contact from '../../contact/models/Contact';
+
+registerEnumType( UserRole, {
+    name: 'UserRole'
+} );
 
 @Entity()
 @ObjectType()
@@ -46,7 +50,7 @@ export default class User extends Model implements UserInterface
         type:   'varchar',
         length: 20
     } )
-    @Field( () => String )
+    @Field( () => UserRole )
     public role: UserRole = UserRole.user;
 
     @Column( {

@@ -4,14 +4,13 @@ import userFactory from '../../../../../tests/factories/userFactory';
 import User from '../../../models/User';
 import { ErrorCodes } from '../../../../../types/ErrorCodes';
 import { ApolloServer } from 'apollo-server';
-import { HEADER_TOKEN_KEY } from '../../../../../constants/request';
-import { createLoaders } from '../../../../../graphql/getContext';
 import { graphql, GraphQLSchema } from 'graphql';
 import UserInterface from '../../../types/UserInterface';
 import * as faker from 'faker';
 import UserInput from '../../inputs/UserInput';
 import { UserRole } from '../../../types/UserRole';
 import createMany from '../../../../../tests/factories/createMany';
+import { contextForUserTests } from '../../../../../tests/contextProviders';
 
 describe( 'graphql users resolvers', () =>
 {
@@ -22,22 +21,6 @@ describe( 'graphql users resolvers', () =>
     const ip = '::ffff:127.0.0.1';
 
     const config = { ...testsConfig };
-    config.contextProvider = () => ( {
-        req:     {
-            headers:    {
-                'X-Client-IP':        ip,
-                [ HEADER_TOKEN_KEY ]: user ? user.createToken().value : '',
-            },
-            header( key: string )
-            {
-                return this.headers[ key ];
-            },
-            connection: {
-                remoteAddress: ip
-            }
-        },
-        loaders: createLoaders()
-    } );
 
     beforeAll( async () =>
     {
@@ -82,14 +65,14 @@ describe( 'graphql users resolvers', () =>
 
         const res = await graphql( {
             schema,
-            contextValue: config.contextProvider( {} ),
+            contextValue: contextForUserTests( user, ip ),
             source:       mutation
         } );
 
-        const user = res.data.createUser as UserInterface;
+        const createdUser = res.data.createUser as UserInterface;
 
-        expect( user.name ).toEqual( 'John' );
-        expect( user.email ).toEqual( 'john@gmail.com' );
+        expect( createdUser.name ).toEqual( 'John' );
+        expect( createdUser.email ).toEqual( 'john@gmail.com' );
     } );
 
     it( 'createUser mutation should return error if IP limit have been exceeded', async () =>
@@ -121,7 +104,7 @@ describe( 'graphql users resolvers', () =>
         const res = await graphql( {
             schema,
             source:         mutation,
-            contextValue:   config.contextProvider( {} ),
+            contextValue:   contextForUserTests( user, ip ),
             variableValues: {
                 user: {
                     name: 'John',
@@ -160,7 +143,7 @@ describe( 'graphql users resolvers', () =>
             variableValues: {
                 user: input
             },
-            contextValue:   config.contextProvider( {} )
+            contextValue:   contextForUserTests( user, ip )
         } );
 
         const result = res.data.updateMe as UserInterface;
@@ -200,7 +183,7 @@ describe( 'graphql users resolvers', () =>
                 id:   targetUser.id,
                 user: input
             },
-            contextValue:   config.contextProvider( {} )
+            contextValue:   contextForUserTests( user, ip )
         } );
 
         const result = res.data.updateUser as UserInterface;

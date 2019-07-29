@@ -17,7 +17,7 @@ export const getUser = async ( request: Request, loader: DataLoader<string, User
     return getUserByToken( token, loader );
 };
 
-export const canCreateUser: AuthAction = async ( { req } ) =>
+export const canCreateUser: AuthAction = async ( { context: { req } } ) =>
 {
     const clientIp = requestIP.getClientIp( req );
 

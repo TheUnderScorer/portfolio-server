@@ -8,6 +8,7 @@ export default interface Context
 {
     req: Request;
     loaders: ContextLoaders
+    currentUser?: User;
 }
 
 export type ContextLoaders = {

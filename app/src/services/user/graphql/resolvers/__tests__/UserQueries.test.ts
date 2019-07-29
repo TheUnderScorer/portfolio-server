@@ -2,11 +2,10 @@ import { ApolloServer } from 'apollo-server';
 import User from '../../../models/User';
 import { graphql, GraphQLSchema } from 'graphql';
 import setupTests, { testsConfig } from '../../../../../tests/setupTests';
-import { HEADER_TOKEN_KEY } from '../../../../../constants/request';
-import { createLoaders } from '../../../../../graphql/getContext';
 import userFactory from '../../../../../tests/factories/userFactory';
 import afterEveryTest from '../../../../../tests/afterEveryTest';
 import createMany from '../../../../../tests/factories/createMany';
+import { contextWithUser } from '../../../../../tests/contextProviders';
 
 describe( 'UserQueries resolver', () =>
 {
@@ -16,22 +15,6 @@ describe( 'UserQueries resolver', () =>
     let schema: GraphQLSchema;
 
     const config = { ...testsConfig };
-    config.contextProvider = () => ( {
-        req:     {
-            headers:    {
-                'X-Client-IP':        '::ffff:127.0.0.1',
-                [ HEADER_TOKEN_KEY ]: user ? user.createToken().value : '',
-            },
-            header( key: string )
-            {
-                return this.headers[ key ];
-            },
-            connection: {
-                remoteAddress: '::ffff:127.0.0.1'
-            }
-        },
-        loaders: createLoaders()
-    } );
 
     beforeAll( async () =>
     {
@@ -58,7 +41,7 @@ describe( 'UserQueries resolver', () =>
 
     it( 'getUsers query', async () =>
     {
-        const users = await createMany( 14, userFactory );
+        await createMany( 14, userFactory );
 
         const query = `
             {
@@ -73,32 +56,12 @@ describe( 'UserQueries resolver', () =>
         const res = await graphql( {
             schema,
             source:       query,
-            contextValue: config.contextProvider( {} )
+            contextValue: contextWithUser( user )
         } );
-
-        const mapID = ( { id }: User ) =>
-        {
-            return id.toString();
-        };
 
         const fetchedUsers = res.data.getUsers as User[];
-        const fetchedUsersIDs = fetchedUsers.map( mapID );
 
-        users.push( user );
-
-        const usersToCheck = users.map( mapID );
-
-        expect( users ).toHaveLength( 15 );
-
-        usersToCheck.forEach( userID =>
-        {
-            expect( fetchedUsersIDs ).toContain( userID );
-        } );
+        expect( fetchedUsers ).toHaveLength( 15 );
     } );
-
-    it( 'getUser query', async () =>
-    {
-
-    } )
 
 } );

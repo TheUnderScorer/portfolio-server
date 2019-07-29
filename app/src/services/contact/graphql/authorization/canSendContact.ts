@@ -7,7 +7,7 @@ import { DateFormats } from '../../../../types/DateFormats';
 import RequestError from '../../../../errors/RequestError';
 import { ErrorCodes } from '../../../../types/ErrorCodes';
 
-const canSendContact: AuthAction = async ( { req, loaders } ) =>
+const canSendContact: AuthAction = async ( { context: { req, loaders } } ) =>
 {
     const currentUser = await getUser( req, loaders.users );
 

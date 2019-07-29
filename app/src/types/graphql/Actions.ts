@@ -1,5 +1,6 @@
 export enum Actions
 {
-    CreateUser  = 'CreateUser',
-    SendContact = 'SendContact'
+    CreateUser               = 'CreateUser',
+    SendContact              = 'SendContact',
+    ChangeConversationStatus = 'ChangeConversationStatus'
 }

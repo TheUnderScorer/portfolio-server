@@ -5,17 +5,18 @@ import { AuthActions } from '../../types/graphql/AuthActions';
 import { getUser } from '../../services/user/graphql/authorization';
 
 const authHandler = ( actions: AuthActions ): AuthChecker<Context, AuthHandlerArgs> => async (
-    { context },
+    data,
     [ { action, role } ]
 ) =>
 {
+    const { context } = data;
     const { req, loaders } = context;
 
     let result: boolean = true;
 
     if ( action && actions[ action ] ) {
         // @ts-ignore
-        result = await actions[ action ]( context );
+        result = await actions[ action ]( data );
     }
 
     if ( !result ) {
