@@ -11,10 +11,12 @@ import attachCurrentUser from '../../../user/graphql/middlewares/attachCurrentUs
 @Resolver( Conversation )
 export default class ConversationMutations
 {
+
     @UseMiddleware( attachCurrentUser )
+    @Authorized( { action: Actions.CreateConversation } )
     @Mutation( () => Conversation )
     public async createConversation(
-        @Arg( 'conversationInput' ) { title }: ConversationInput,
+        @Arg( 'conversationInput', { nullable: true } ) { title = '' }: ConversationInput = {},
         @Ctx() { req, loaders, currentUser: author }: Context,
         @PubSub( Subscriptions.NewConversation ) publish: Publisher<Conversation>
     ): Promise<Conversation>

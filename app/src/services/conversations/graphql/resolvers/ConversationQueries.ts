@@ -1,16 +1,26 @@
-import { Args, Ctx, Query, Resolver } from 'type-graphql';
+import { Args, Ctx, Query, Resolver, UseMiddleware } from 'type-graphql';
 import Conversation from '../../models/Conversation';
 import Context from '../../../../types/graphql/Context';
 import { getUser } from '../../../user/graphql/authorization';
 import PaginationArgs from '../../../../graphql/args/PaginationArgs';
 import { getOffset } from '../../../../common/pagination';
 import events from '../../../../events';
+import attachCurrentUser from '../../../user/graphql/middlewares/attachCurrentUser';
+import getCurrentConversation from '../../queries/conversation/getCurrentConversation';
 
 @Resolver( Conversation )
 export default class ConversationQueries
 {
 
-    // TODO Tests
+    @Query( () => Conversation, { nullable: true } )
+    @UseMiddleware( attachCurrentUser )
+    public async getCurrentConversation(
+        @Ctx() { currentUser, loaders, req }: Context
+    ): Promise<Conversation>
+    {
+        return getCurrentConversation( currentUser );
+    }
+
     @Query( () => [ Conversation ] )
     public async myConversations(
         @Args() { page = 1, perPage = 15 }: PaginationArgs,

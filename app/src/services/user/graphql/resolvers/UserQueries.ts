@@ -1,9 +1,8 @@
-import { Arg, Args, Authorized, Ctx, FieldResolver, ID, Info, Query, Resolver, Root } from 'type-graphql';
+import { Arg, Args, Authorized, Ctx, ID, Info, Query, Resolver } from 'type-graphql';
 import User from '../../models/User';
 import { getOffset } from '../../../../common/pagination';
 import Context from '../../../../types/graphql/Context';
 import PaginationArgs from '../../../../graphql/args/PaginationArgs';
-import Conversation from '../../../conversations/models/Conversation';
 import { loadMany } from '../../../../graphql/common/dataLoader';
 import * as graphqlFields from 'graphql-fields';
 import { UserRole } from '../../types/UserRole';
@@ -57,29 +56,6 @@ export default class UserQueries
     public async me( @Ctx() { loaders, req }: Context ): Promise<User>
     {
         return await getUser( req, loaders.users );
-    }
-
-    @FieldResolver( () => [ Conversation ] )
-    public async conversations(
-        @Root() user: User,
-        @Args() { perPage = 15, page = 1 }: PaginationArgs,
-        @Ctx() { loaders }: Context ): Promise<Conversation[]>
-    {
-        const conversations = await Conversation.find( {
-            where: {
-                author: user.id
-            },
-            take:  perPage,
-            skip:  getOffset( page, perPage )
-        } );
-
-        loadMany(
-            conversations,
-            conversation => conversation.id.toString(),
-            loaders.conversations
-        );
-
-        return conversations;
     }
 
 }
