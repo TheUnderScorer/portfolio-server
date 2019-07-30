@@ -4,5 +4,5 @@ export enum Subscriptions
     NewConversation     = 'NewConversation',
     ConversationUpdated = 'ConversationUpdated',
     ConversationDeleted = 'ConversationDeleted',
-    ConversationErrors  = 'ConversationErrors'
+    ConversationErrors  = 'ConversationErrors',
 }

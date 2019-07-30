@@ -9,7 +9,9 @@ import { Moment } from 'moment';
 import MessageInterface from '../types/MessageInterface';
 
 @Entity()
-@ObjectType()
+@ObjectType( {
+    description: 'Describes message model'
+} )
 export default class Message extends Model implements MessageInterface
 {
 
@@ -59,6 +61,7 @@ export default class Message extends Model implements MessageInterface
     public setCreateDate(): void
     {
         this.createdAt = moment();
+        this.updatedAt = moment();
     }
 
     @BeforeUpdate()

@@ -17,17 +17,32 @@ import canChangeStatus from '../services/conversations/graphql/authorization/can
 import ConversationFields from '../services/conversations/graphql/resolvers/ConversationFields';
 import UserFields from '../services/user/graphql/resolvers/UserFields';
 import canCreateConversation from '../services/conversations/graphql/authorization/canCreateConversation';
+import MessageMutations from '../services/conversations/graphql/resolvers/MessageMutations';
+import MessageSubscriptions from '../services/conversations/graphql/resolvers/MessageSubscriptions';
+import canSendMessage from '../services/conversations/graphql/authorization/canSendMessage';
 
 const appConfig: AppConfig = {
     contextProvider: getContext(),
     schemaOptions:   {
-        resolvers: [ UserQueries, UserMutations, UserFields, ConversationMutations, ConversationQueries, ConversationFields, ConversationSubscriptions, ContactMutations ]
+        resolvers: [
+            UserQueries,
+            UserMutations,
+            UserFields,
+            ConversationMutations,
+            ConversationQueries,
+            ConversationFields,
+            ConversationSubscriptions,
+            ContactMutations,
+            MessageMutations,
+            MessageSubscriptions
+        ]
     },
     authActions:     {
         [ Actions.CreateUser ]:               canCreateUser,
         [ Actions.SendContact ]:              canSendContact,
         [ Actions.ChangeConversationStatus ]: canChangeStatus,
-        [ Actions.CreateConversation ]:       canCreateConversation
+        [ Actions.CreateConversation ]:       canCreateConversation,
+        [ Actions.SendMessage ]:              canSendMessage
     },
     entities:        [ User, Conversation, Message, Contact ]
 };

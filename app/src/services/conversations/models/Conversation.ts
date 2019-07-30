@@ -14,7 +14,9 @@ registerEnumType( ConversationStatuses, {
 } );
 
 @Entity()
-@ObjectType()
+@ObjectType( {
+    description: 'Describes conversation model'
+} )
 export default class Conversation extends Model implements ConversationInterface
 {
 
