@@ -7,39 +7,42 @@ import { ErrorCodes } from '../../../types/ErrorCodes';
 import * as requestIP from 'request-ip';
 import RequestError from '../../../errors/RequestError';
 import { BAD_REQUEST } from 'http-status';
+import * as DataLoader from 'dataloader';
+import { AuthAction } from '../../../types/graphql/AuthActions';
 
-export const getUser = async ( request: Request ): Promise<User> =>
+export const getUser = async ( request: Request, loader: DataLoader<string, User> ): Promise<User> =>
 {
     const token = request.header( HEADER_TOKEN_KEY );
 
-    return getUserByToken( token );
+    return getUserByToken( token, loader );
 };
 
-export const canCreateUser = async ( request: Request ): Promise<void> =>
+export const canCreateUser: AuthAction = async ( { context: { req } } ) =>
 {
-    const clientIp = requestIP.getClientIp( request );
+    const clientIp = requestIP.getClientIp( req );
 
     const accountsPerIP = parseInt( process.env.ACCOUNTS_PER_IP );
 
-    // TODO User.count does not work here for some reason
-    const usersByIP = await User.find( {
+    const usersByIP = await User.count( {
         where: {
             ip: clientIp
         }
     } );
 
-    if ( usersByIP.length >= accountsPerIP ) {
+    if ( usersByIP >= accountsPerIP ) {
         throw new RequestError(
             'Account limit for this ip have been exceeded.',
             ErrorCodes.AccountLimitExceeded,
             BAD_REQUEST
         )
     }
+
+    return true;
 };
 
 export const canModifyUser = async ( currentUser: User, modifiedUser: User ): Promise<void> =>
 {
-    if ( currentUser.id.equals( modifiedUser.id ) ) {
+    if ( currentUser.id === modifiedUser.id ) {
         return;
     }
 

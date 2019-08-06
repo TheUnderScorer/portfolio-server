@@ -4,6 +4,7 @@ import * as moment from 'moment';
 import User from '../services/user/models/User';
 import Exception from '../errors/Exception';
 import { ErrorCodes } from '../types/ErrorCodes';
+import DataLoader = require('dataloader');
 
 export const sign = ( payload: any ): Token =>
 {
@@ -25,7 +26,7 @@ export const sign = ( payload: any ): Token =>
     }
 };
 
-export const getUserByToken = async ( token: Token | string ): Promise<User> =>
+export const getUserByToken = async ( token: Token | string, loader: DataLoader<string, User> ): Promise<User> =>
 {
     if ( typeof token === 'object' ) {
         token = token.value;
@@ -39,7 +40,7 @@ export const getUserByToken = async ( token: Token | string ): Promise<User> =>
 
     const { id } = value;
 
-    const user = await User.findOne( id );
+    const user = await loader.load( id.toString() );
 
     if ( !user ) {
         throw new Exception( 'No user found with provided token.', ErrorCodes.InvalidToken )

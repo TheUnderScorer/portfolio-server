@@ -1,25 +1,21 @@
 import events from './events';
 import { Connection, createConnection } from 'typeorm';
-import User from './services/user/models/User';
-import { ApolloServer } from 'apollo-server';
-
-export const entities = [ User ];
+import AppConfig from './types/AppConfig';
 
 export let connection: Connection;
 
-events.on( 'app.server.started', ( server: ApolloServer ) =>
+events.on( 'app.server.started', ( config: AppConfig ) =>
 {
     createConnection( {
-        type:            'mongodb',
-        host:            process.env.DB_HOST,
-        port:            parseInt( process.env.DB_PORT ),
-        username:        process.env.DB_USER,
-        password:        process.env.DB_PASS,
-        database:        process.env.DB,
-        useNewUrlParser: true,
-        entities:        entities,
-        synchronize:     true,
-        logging:         true,
+        type:        'mariadb',
+        host:        process.env.DB_HOST,
+        port:        parseInt( process.env.DB_PORT ),
+        username:    process.env.DB_USER,
+        password:    process.env.DB_PASS,
+        database:    process.env.DB,
+        entities:    config.entities,
+        synchronize: true,
+        logging:     true,
     } ).then( ( conn ) =>
     {
         console.log( 'Connected do database!' );

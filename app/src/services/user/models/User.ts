@@ -1,45 +1,100 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, ObjectID, ObjectIdColumn } from 'typeorm';
 import { UserRole } from '../types/UserRole';
 import UserInterface from '../types/UserInterface';
 import * as bcrypt from 'bcrypt';
-import { DateFormats } from '../../../types/DateFormats';
-import Model from '../../../models/Model';
-import Token from '../types/Token';
 import { sign } from '../../../common/jwt';
 import * as moment from 'moment';
 import { Moment } from 'moment';
+import Model from '../../../models/Model';
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Authorized, Field, ID, ObjectType, registerEnumType } from 'type-graphql';
+import Conversation from '../../conversations/models/Conversation';
+import TokenInterface from '../types/Token';
+import Token from '../graphql/objects/Token';
+import Message from '../../conversations/models/Message';
+import { momentTransformer } from '../../../common/typeorm/transformers';
+import ContactInterface from '../../contact/types/ContactInterface';
+import Contact from '../../contact/models/Contact';
+
+registerEnumType( UserRole, {
+    name: 'UserRole'
+} );
 
 @Entity()
+@ObjectType()
 export default class User extends Model implements UserInterface
 {
-    @ObjectIdColumn()
-    public id: ObjectID;
+    @PrimaryGeneratedColumn()
+    @Field( () => ID )
+    public id: number;
 
     @Column( {
+        nullable: true,
+    } )
+    @Field( {
         nullable: true,
     } )
     public name: string;
 
     @Column( {
-        nullable: true,
+        nullable:    true,
+        transformer: momentTransformer,
+        type:        'datetime'
     } )
-    public lastLogin: string;
+    @Field(
+        () => String, {
+            nullable: true,
+        } )
+    public lastLogin: Moment;
 
-    @Column()
-    public role: UserRole = 'user';
+    @Column( {
+        type:   'varchar',
+        length: 20
+    } )
+    @Field( () => UserRole )
+    public role: UserRole = UserRole.user;
 
     @Column( {
         nullable: true
     } )
+    @Field( {
+        nullable: true,
+    } )
+    @Authorized( { role: 'administrator' } )
     public password: string;
 
     @Column()
+    @Field()
+    @Authorized( { role: 'administrator' } )
     public ip: string;
 
     @Column( {
         nullable: true
     } )
+    @Field( {
+        nullable: true,
+    } )
     public email: string;
+
+    @OneToMany(
+        () => Conversation,
+        Conversation => Conversation.author
+    )
+    @Field( () => [ Conversation ], { nullable: true } )
+    public conversations: Promise<Conversation[]>;
+
+    @OneToMany(
+        () => Message,
+        Message => Message.author
+    )
+    @Field( () => [ Message ], { nullable: true } )
+    public messages: Promise<Message[]>;
+
+    @OneToMany(
+        () => Contact,
+        Contact => Contact.user
+    )
+    @Field( () => [ Contact ], { nullable: true } )
+    public contacts: Promise<ContactInterface[]>;
 
     @BeforeUpdate()
     @BeforeInsert()
@@ -57,33 +112,29 @@ export default class User extends Model implements UserInterface
         return bcrypt.compareSync( password, this.password );
     }
 
-    public createToken(): Token
+    @Field( () => Token, { nullable: true } )
+    public get token(): Token
+    {
+        return this.createToken();
+    }
+
+    @Field()
+    public get hasPassword(): boolean
+    {
+        return !!this.password;
+    }
+
+    public createToken(): TokenInterface
     {
         return sign( {
             id: this.id.toString()
         } )
     }
 
-    public getLastLogin(): Moment
-    {
-        return moment( this.lastLogin );
-    }
-
     @BeforeInsert()
     public async updateLastLogin(): Promise<void>
     {
-        this.lastLogin = moment().format( DateFormats.DateTime );
-    }
-
-    public toJSON(): any
-    {
-        const json = super.toJSON();
-
-        if ( typeof json.lastLogin === 'object' ) {
-            json.lastLogin = json.lastLogin.format( DateFormats.DateTime );
-        }
-
-        return json;
+        this.lastLogin = moment();
     }
 
 }
