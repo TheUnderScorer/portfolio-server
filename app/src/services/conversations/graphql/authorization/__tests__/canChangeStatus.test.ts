@@ -52,8 +52,10 @@ describe( 'canChangeStatus', () =>
         try {
             await canChangeStatus( {
                 args:    {
-                    conversationID: conversation.id,
-                    status:         ConversationStatuses.open
+                    input: {
+                        id:     conversation.id,
+                        status: ConversationStatuses.open
+                    }
                 },
                 // @ts-ignore
                 info:    {},
