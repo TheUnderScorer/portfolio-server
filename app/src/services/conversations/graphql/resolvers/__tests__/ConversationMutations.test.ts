@@ -12,6 +12,24 @@ import Conversation from '../../../models/Conversation';
 import Result from '../../../../../graphql/objects/Result';
 import { contextWithUser } from '../../../../../tests/contextProviders';
 import ChangeConversationStatusInput from '../../inputs/ChangeConversationStatusInput';
+import events from '../../../../../events';
+
+interface SentTranscript
+{
+    conversation: Conversation,
+    email?: string,
+}
+
+let sentTranscripts: SentTranscript[] = [];
+
+jest.mock( '../../../common/sendTranscript', () => ( {
+    default: async ( conversation: Conversation, email: string ) =>
+             {
+                 sentTranscripts.push( { conversation, email } );
+
+                 return true;
+             }
+} ) );
 
 describe( 'ConversationMutations', () =>
 {
@@ -161,7 +179,7 @@ describe( 'ConversationMutations', () =>
             status: ConversationStatuses.closed
         };
 
-        const result = await graphql( {
+        await graphql( {
             schema,
             source:         mutation,
             contextValue:   contextWithUser( user ),
@@ -175,9 +193,43 @@ describe( 'ConversationMutations', () =>
         expect( conversation.status ).toEqual( ConversationStatuses.closed );
     } );
 
-    it( 'changeStatus should send transcript', async () =>
+    it( 'changeStatus should send transcript and trigger event', async ( done ) =>
     {
+        const conversation = await conversationFactory( { author: user } );
 
+        events.on( 'app.conversation.transcriptSent', ( conv: Conversation ) =>
+        {
+            expect( conv.id ).toEqual( conversation.id );
+
+            expect( sentTranscripts[ 0 ].conversation.id ).toEqual( conversation.id );
+            expect( sentTranscripts[ 0 ].email ).toEqual( user.email );
+
+            done();
+        } );
+
+        const input: ChangeConversationStatusInput = {
+            id:             conversation.id,
+            status:         ConversationStatuses.closed,
+            sendTranscript: true,
+        };
+
+        const mutation = `
+            mutation ChangeStatus($input: ChangeConversationStatusInput!) {
+                changeStatus(input: $input){
+                    id,
+                    status
+                }
+            }
+        `;
+
+        await graphql( {
+            schema,
+            source:         mutation,
+            contextValue:   contextWithUser( user ),
+            variableValues: {
+                input
+            }
+        } );
     } );
 
 } );
