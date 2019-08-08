@@ -55,6 +55,8 @@ describe( 'ConversationMutations', () =>
     afterEach( async () =>
     {
         await afterEveryTest( config );
+
+        sentTranscripts = [];
     } );
 
     afterAll( async () =>
