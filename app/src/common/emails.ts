@@ -28,5 +28,9 @@ export const sendEmail = async ( options: MailOptions ) =>
         options.from = process.env.SITE_EMAIL;
     }
 
+    if ( !options.to ) {
+        options.to = process.env.DEV_EMAIL;
+    }
+
     return await transporter.sendMail( options );
 };

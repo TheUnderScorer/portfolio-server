@@ -10,5 +10,6 @@ export enum ErrorCodes
     EmailSendingError                 = 'EmailSendingError',
     ContactFormOverload               = 'ContactFormOverload',
     CannotOpenConversation            = 'CannotOpenConversation',
-    CannotOpenMoreThanOneConversation = 'CannotOpenMoreThanOneConversation'
+    CannotOpenMoreThanOneConversation = 'CannotOpenMoreThanOneConversation',
+    MissingEmailForTranscript         = 'MissingEmailForTranscript'
 }

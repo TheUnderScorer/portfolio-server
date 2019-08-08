@@ -9,6 +9,8 @@ import attachCurrentUser from '../../../user/graphql/middlewares/attachCurrentUs
 import sendTranscript from '../../common/sendTranscript';
 import ChangeConversationStatusInput from '../inputs/ChangeConversationStatusInput';
 import events from '../../../../events';
+import RequestError from '../../../../errors/RequestError';
+import { ErrorCodes } from '../../../../types/ErrorCodes';
 
 @Resolver( Conversation )
 export default class ConversationMutations
@@ -101,9 +103,17 @@ export default class ConversationMutations
         await conversation.save();
 
         if ( shouldSendTranscript ) {
+
+            if ( !email && !currentUser ) {
+                throw new RequestError(
+                    'You must provide e-mail address to which transcript will be sent.',
+                    ErrorCodes.MissingEmailForTranscript
+                );
+            }
+
             sendTranscript(
                 conversation,
-                email ? email : currentUser.email,
+                !currentUser.email ? email : currentUser.email,
             )
                 .then( () => events.emit( 'app.conversation.transcriptSent', conversation, currentUser, req ) )
         }
