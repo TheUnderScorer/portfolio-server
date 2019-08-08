@@ -13,22 +13,17 @@ import Result from '../../../../../graphql/objects/Result';
 import { contextWithUser } from '../../../../../tests/contextProviders';
 import ChangeConversationStatusInput from '../../inputs/ChangeConversationStatusInput';
 import events from '../../../../../events';
+import { MailOptions } from 'nodemailer/lib/sendmail-transport';
 
-interface SentTranscript
-{
-    conversation: Conversation,
-    email?: string,
-}
+let sentTranscripts: MailOptions[] = [];
 
-let sentTranscripts: SentTranscript[] = [];
+jest.mock( '../../../../../common/emails', () => ( {
+    sendEmail: async ( options: MailOptions ) =>
+               {
+                   sentTranscripts.push( options );
 
-jest.mock( '../../../common/sendTranscript', () => ( {
-    default: async ( conversation: Conversation, email: string ) =>
-             {
-                 sentTranscripts.push( { conversation, email } );
-
-                 return true;
-             }
+                   return true;
+               }
 } ) );
 
 describe( 'ConversationMutations', () =>
@@ -203,8 +198,8 @@ describe( 'ConversationMutations', () =>
         {
             expect( conv.id ).toEqual( conversation.id );
 
-            expect( sentTranscripts[ 0 ].conversation.id ).toEqual( conversation.id );
-            expect( sentTranscripts[ 0 ].email ).toEqual( user.email );
+            expect( sentTranscripts[ 0 ].to ).toEqual( user.email );
+            expect( sentTranscripts[ 0 ].subject ).toContain( conversation.id );
 
             done();
         } );
