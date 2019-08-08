@@ -1,11 +1,11 @@
 import Context, { ContextLoaders } from '../types/graphql/Context';
-import * as DataLoader from 'dataloader';
 import Conversation from '../services/conversations/models/Conversation';
 import Message from '../services/conversations/models/Message';
 import User from '../services/user/models/User';
 import { HEADER_TOKEN_KEY } from '../constants/request';
 import SubscriptionContext from '../types/graphql/SubscriptionContext';
 import { getUserByToken } from '../common/jwt';
+import DataLoader from '../common/DataLoader';
 
 export const createLoaders = (): ContextLoaders => ( {
     users:         new DataLoader( ids => User.findByIds( ids ) ),

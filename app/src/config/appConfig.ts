@@ -20,6 +20,7 @@ import canCreateConversation from '../services/conversations/graphql/authorizati
 import MessageMutations from '../services/conversations/graphql/resolvers/MessageMutations';
 import MessageSubscriptions from '../services/conversations/graphql/resolvers/MessageSubscriptions';
 import canSendMessage from '../services/conversations/graphql/authorization/canSendMessage';
+import MessageFields from '../services/conversations/graphql/resolvers/MessageFields';
 
 const appConfig: AppConfig = {
     contextProvider: getContext(),
@@ -34,7 +35,8 @@ const appConfig: AppConfig = {
             ConversationSubscriptions,
             ContactMutations,
             MessageMutations,
-            MessageSubscriptions
+            MessageSubscriptions,
+            MessageFields
         ]
     },
     authActions:     {

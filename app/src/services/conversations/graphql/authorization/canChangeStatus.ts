@@ -8,7 +8,7 @@ import { ErrorCodes } from '../../../../types/ErrorCodes';
 
 const canChangeStatus: AuthAction = async ( { context, args = {} } ) =>
 {
-    const { conversationID, status } = args;
+    const { id, status } = args.input;
     const { loaders: { conversations, users }, req } = context;
 
     const currentUser = await getUser( req, users );
@@ -17,11 +17,14 @@ const canChangeStatus: AuthAction = async ( { context, args = {} } ) =>
         return true;
     }
 
-    const conversation = await Conversation.findOneOrFail( {
-        where: {
-            id:   conversationID,
-            user: currentUser.id
-        }
+    const conversation = await conversations.save( () =>
+    {
+        return Conversation.findOneOrFail( {
+            where: {
+                id,
+                user: currentUser.id
+            }
+        } );
     } );
 
     if ( conversation.status === ConversationStatuses.closed && status === ConversationStatuses.open ) {
@@ -30,11 +33,6 @@ const canChangeStatus: AuthAction = async ( { context, args = {} } ) =>
             ErrorCodes.CannotOpenConversation
         )
     }
-
-    conversations.prime(
-        conversation.id.toString(),
-        conversation
-    );
 
     return true;
 };

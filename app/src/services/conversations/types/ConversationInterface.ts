@@ -5,8 +5,8 @@ import ModelInterface from '../../../types/ModelInterface';
 
 export enum ConversationStatuses
 {
-    'open'   = 'Open',
-    'closed' = 'Closed'
+    open   = 'open',
+    closed = 'closed'
 }
 
 export default interface ConversationInterface extends ModelInterface

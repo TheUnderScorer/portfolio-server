@@ -1,8 +1,8 @@
-import * as DataLoader from 'dataloader';
 import User from '../../services/user/models/User';
 import Conversation from '../../services/conversations/models/Conversation';
 import Message from '../../services/conversations/models/Message';
 import { Request } from 'express';
+import DataLoader from '../../common/DataLoader';
 
 export default interface Context
 {
@@ -12,7 +12,7 @@ export default interface Context
 }
 
 export type ContextLoaders = {
-    users: DataLoader<string, User>;
-    conversations: DataLoader<string, Conversation>;
-    messages: DataLoader<string, Message>;
+    users: DataLoader<string | number, User>;
+    conversations: DataLoader<string | number, Conversation>;
+    messages: DataLoader<string | number, Message>;
 };

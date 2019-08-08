@@ -9,8 +9,9 @@ import ConversationInput from '../../inputs/ConversationInput';
 import * as faker from 'faker';
 import conversationFactory from '../../../../../tests/factories/conversationFactory';
 import Conversation from '../../../models/Conversation';
-import DeleteConversationResult from '../../objects/DeleteConversationResult';
+import Result from '../../../../../graphql/objects/Result';
 import { contextWithUser } from '../../../../../tests/contextProviders';
+import ChangeConversationStatusInput from '../../inputs/ChangeConversationStatusInput';
 
 describe( 'ConversationMutations', () =>
 {
@@ -136,7 +137,7 @@ describe( 'ConversationMutations', () =>
             }
         } );
 
-        const { result } = res.data.deleteConversation as DeleteConversationResult;
+        const { result } = res.data.deleteConversation as Result;
 
         expect( result ).toBeTruthy();
         expect( await Conversation.findOne( conversation.id ) ).toBeUndefined();
@@ -147,27 +148,36 @@ describe( 'ConversationMutations', () =>
         const conversation = await conversationFactory( { author: user } );
 
         const mutation = `
-            mutation ChangeStatus($status: ConversationStatuses!, $conversationID: ID!) {
-                changeStatus(status: $status, conversationID: $conversationID){
+            mutation ChangeStatus($input: ChangeConversationStatusInput!) {
+                changeStatus(input: $input){
                     id,
                     status
                 }
             }
         `;
 
-        await graphql( {
+        const input: ChangeConversationStatusInput = {
+            id:     conversation.id,
+            status: ConversationStatuses.closed
+        };
+
+        const result = await graphql( {
             schema,
             source:         mutation,
             contextValue:   contextWithUser( user ),
             variableValues: {
-                conversationID: conversation.id,
-                status:         'closed'
+                input
             }
         } );
 
         await conversation.reload();
 
         expect( conversation.status ).toEqual( ConversationStatuses.closed );
+    } );
+
+    it( 'changeStatus should send transcript', async () =>
+    {
+
     } );
 
 } );

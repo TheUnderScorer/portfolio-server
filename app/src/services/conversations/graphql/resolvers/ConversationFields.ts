@@ -24,7 +24,7 @@ export default class ConversationFields
             take:  perPage,
             skip:  getOffset( page, perPage ),
             order: {
-                createdAt: 'ASC'
+                createdAt: 'DESC'
             }
         } );
 

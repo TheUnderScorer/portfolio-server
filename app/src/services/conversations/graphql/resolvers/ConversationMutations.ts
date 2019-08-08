@@ -2,11 +2,13 @@ import Conversation from '../../models/Conversation';
 import { Arg, Authorized, Ctx, ID, Mutation, Publisher, PubSub, Resolver, UseMiddleware } from 'type-graphql';
 import ConversationInput from '../inputs/ConversationInput';
 import Context from '../../../../types/graphql/Context';
-import DeleteConversationResult from '../objects/DeleteConversationResult';
+import Result from '../../../../graphql/objects/Result';
 import { Subscriptions } from '../../../../types/graphql/Subscriptions';
-import { ConversationStatuses } from '../../types/ConversationInterface';
 import { Actions } from '../../../../types/graphql/Actions';
 import attachCurrentUser from '../../../user/graphql/middlewares/attachCurrentUser';
+import sendTranscript from '../../common/sendTranscript';
+import ChangeConversationStatusInput from '../inputs/ChangeConversationStatusInput';
+import events from '../../../../events';
 
 @Resolver( Conversation )
 export default class ConversationMutations
@@ -63,12 +65,12 @@ export default class ConversationMutations
     }
 
     @UseMiddleware( attachCurrentUser )
-    @Mutation( () => DeleteConversationResult )
+    @Mutation( () => Result )
     public async deleteConversation(
         @Arg( 'id', () => ID ) id: number,
         @Ctx() { req, loaders, currentUser }: Context,
         @PubSub( Subscriptions.ConversationDeleted ) publish: Publisher<Conversation>
-    ): Promise<DeleteConversationResult>
+    ): Promise<Result>
     {
         const conversation = await Conversation.findOneOrFail( id, {
             where: {
@@ -89,17 +91,50 @@ export default class ConversationMutations
     @UseMiddleware( attachCurrentUser )
     @Mutation( () => Conversation )
     public async changeStatus(
-        @Arg( 'conversationID', () => ID ) conversationID: number,
-        @Arg( 'status', () => ConversationStatuses ) status: ConversationStatuses,
-        @Ctx() { loaders: { conversations } }: Context
+        @Arg( 'input' ) { id, status, email, sendTranscript: shouldSendTranscript }: ChangeConversationStatusInput,
+        @Ctx() { loaders: { conversations }, currentUser, req }: Context
     ): Promise<Conversation>
     {
-        const conversation = await conversations.load( conversationID.toString() );
+        const conversation = await conversations.load( id );
         conversation.status = status;
 
         await conversation.save();
 
+        if ( shouldSendTranscript ) {
+            sendTranscript(
+                conversation,
+                email ? email : currentUser.email,
+            )
+                .then( () => events.emit( 'app.conversation.transcriptSent', conversation, currentUser, req ) )
+        }
+
         return conversation;
+    }
+
+    @UseMiddleware( attachCurrentUser )
+    @Mutation( () => Result, {
+        description: 'Sends transcript of given conversation to it\'s author.'
+    } )
+    public async sendTranscript(
+        @Arg( 'conversationID', () => ID ) conversationID: number,
+        @Ctx() { currentUser, loaders: { conversations } }: Context
+    ): Promise<Result>
+    {
+        const conversation = await conversations.save( () =>
+        {
+            return Conversation.findOneOrFail( {
+                where: {
+                    author: currentUser.id,
+                    id:     conversationID
+                }
+            } );
+        } );
+
+        await sendTranscript( conversation, currentUser.email );
+
+        return {
+            result: true
+        }
     }
 
 }
