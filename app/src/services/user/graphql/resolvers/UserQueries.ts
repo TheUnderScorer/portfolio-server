@@ -3,7 +3,6 @@ import User from '../../models/User';
 import { getOffset } from '../../../../common/pagination';
 import Context from '../../../../types/graphql/Context';
 import PaginationArgs from '../../../../graphql/args/PaginationArgs';
-import { loadMany } from '../../../../graphql/common/dataLoader';
 import * as graphqlFields from 'graphql-fields';
 import { UserRole } from '../../types/UserRole';
 import { getUser } from '../authorization';
@@ -33,11 +32,7 @@ export default class UserQueries
             relations
         } );
 
-        loadMany(
-            users,
-            user => user.id.toString(),
-            loaders.users,
-        );
+        loaders.users.saveMany( users );
 
         return users;
     }

@@ -3,7 +3,6 @@ import Conversation from '../../models/Conversation';
 import Message from '../../models/Message';
 import PaginationArgs from '../../../../graphql/args/PaginationArgs';
 import { getOffset } from '../../../../common/pagination';
-import { loadMany } from '../../../../graphql/common/dataLoader';
 import Context from '../../../../types/graphql/Context';
 
 @Resolver( Conversation )
@@ -28,11 +27,7 @@ export default class ConversationFields
             }
         } );
 
-        loadMany(
-            messages,
-            message => message.id.toString(),
-            loaders.messages
-        );
+        loaders.messages.saveMany( messages );
 
         return messages.reverse();
     }

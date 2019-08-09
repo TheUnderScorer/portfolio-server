@@ -4,7 +4,6 @@ import Conversation from '../../../conversations/models/Conversation';
 import PaginationArgs from '../../../../graphql/args/PaginationArgs';
 import Context from '../../../../types/graphql/Context';
 import { getOffset } from '../../../../common/pagination';
-import { loadMany } from '../../../../graphql/common/dataLoader';
 
 @Resolver( User )
 export default class UserFields
@@ -24,11 +23,7 @@ export default class UserFields
             skip:  getOffset( page, perPage )
         } );
 
-        loadMany(
-            conversations,
-            conversation => conversation.id.toString(),
-            loaders.conversations
-        );
+        loaders.conversations.saveMany( conversations );
 
         return conversations;
     }
