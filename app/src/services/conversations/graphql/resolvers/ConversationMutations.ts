@@ -115,7 +115,14 @@ export default class ConversationMutations
                 conversation,
                 !currentUser.email ? email : currentUser.email,
             )
-                .then( () => events.emit( 'app.conversation.transcriptSent', conversation, currentUser, req ) )
+                .then( () => events.emit( 'app.conversation.transcriptSent', conversation, currentUser, req ) );
+
+            if ( email && !currentUser.email ) {
+                currentUser.email = email;
+
+                await currentUser.save();
+            }
+
         }
 
         return conversation;
