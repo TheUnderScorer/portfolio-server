@@ -4,8 +4,8 @@ import DataLoader from '../DataLoader';
 describe( 'DataLoader', () =>
 {
 
-    let model: ModelInterface;
-    let loader: DataLoader<number, ModelInterface>;
+    let model: ModelInterface & any;
+    let loader: DataLoader<number, ModelInterface & any>;
 
     beforeEach( () =>
     {
@@ -13,7 +13,7 @@ describe( 'DataLoader', () =>
             id: 1,
         };
 
-        loader = new DataLoader<number, ModelInterface>( () => Promise.resolve( model as any ) );
+        loader = new DataLoader( () => Promise.resolve( [ model ] ) );
     } );
 
     it( 'save method', async () =>
@@ -46,6 +46,22 @@ describe( 'DataLoader', () =>
 
             expect( loadedModel.id ).toEqual( model.id );
         }
+    } );
+
+    it( 'update method', async () =>
+    {
+        model.test = false;
+
+        loader.prime( model, model.id );
+
+        const loadedModel = await loader.load( model.id );
+        expect( loadedModel.test ).toBeFalsy();
+
+        model.test = true;
+        loader.update( model );
+
+        const modelAfterUpdate = await loader.load( model.id );
+        expect( modelAfterUpdate.test ).toBeTruthy();
     } );
 
 } );

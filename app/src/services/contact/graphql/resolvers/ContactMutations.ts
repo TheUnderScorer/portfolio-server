@@ -45,7 +45,7 @@ export default class ContactMutations
         try {
             await sendContact( contact )
         } catch ( e ) {
-            contact.remove();
+            await contact.remove();
 
             throw e;
         }

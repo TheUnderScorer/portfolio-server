@@ -8,7 +8,7 @@ import * as moment from 'moment';
 import events from '../../../../events';
 import { getUser } from '../authorization';
 import { UserRole } from '../../types/UserRole';
-import * as DataLoader from 'dataloader';
+import DataLoader from '../../../../common/DataLoader';
 
 @Resolver( User )
 export default class UserResolver
@@ -17,10 +17,7 @@ export default class UserResolver
     private static async updateUserData( user: User, input: UserInput, loader: DataLoader<string, User> ): Promise<User>
     {
         const updatedUser = Object.assign( user, input );
-
-        loader
-            .clear( updatedUser.id.toString() )
-            .prime( updatedUser.id.toString(), updatedUser );
+        loader.update( updatedUser );
 
         await user.save();
 

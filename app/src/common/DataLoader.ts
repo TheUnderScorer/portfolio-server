@@ -16,6 +16,15 @@ export default class DataLoader<K, V extends ModelInterface> extends BaseLoader<
         return model;
     }
 
+    public update( model: V ): this
+    {
+        this
+            .clear( model.id as any, )
+            .prime( model.id as any, model );
+
+        return this;
+    }
+
     public saveMany( models: V[] ): this
     {
         models.forEach( model => this.prime( model.id as any, model ) );
