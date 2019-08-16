@@ -11,6 +11,7 @@ import ChangeConversationStatusInput from '../inputs/ChangeConversationStatusInp
 import events from '../../../../events';
 import RequestError from '../../../../errors/RequestError';
 import { ErrorCodes } from '../../../../types/ErrorCodes';
+import User from '../../../user/models/User';
 
 @Resolver( Conversation )
 export default class ConversationMutations
@@ -89,6 +90,27 @@ export default class ConversationMutations
         };
     }
 
+    protected static async sendTranscript( conversation: Conversation, currentUser: User, email: string ): Promise<void>
+    {
+        if ( !email && !currentUser ) {
+            throw new RequestError(
+                'You must provide e-mail address to which transcript will be sent.',
+                ErrorCodes.MissingEmailForTranscript
+            );
+        }
+
+        sendTranscript(
+            conversation,
+            !currentUser.email ? email : currentUser.email, )
+            .then( () => events.emit( 'app.conversation.transcriptSent', conversation, currentUser ) );
+
+        if ( email && !currentUser.email ) {
+            currentUser.email = email;
+
+            await currentUser.save();
+        }
+    }
+
     @Authorized( { action: Actions.ChangeConversationStatus } )
     @UseMiddleware( attachCurrentUser )
     @Mutation( () => Conversation )
@@ -103,26 +125,7 @@ export default class ConversationMutations
         await conversation.save();
 
         if ( shouldSendTranscript ) {
-
-            if ( !email && !currentUser ) {
-                throw new RequestError(
-                    'You must provide e-mail address to which transcript will be sent.',
-                    ErrorCodes.MissingEmailForTranscript
-                );
-            }
-
-            sendTranscript(
-                conversation,
-                !currentUser.email ? email : currentUser.email,
-            )
-                .then( () => events.emit( 'app.conversation.transcriptSent', conversation, currentUser, req ) );
-
-            if ( email && !currentUser.email ) {
-                currentUser.email = email;
-
-                await currentUser.save();
-            }
-
+            await ConversationMutations.sendTranscript( conversation, currentUser, email );
         }
 
         return conversation;

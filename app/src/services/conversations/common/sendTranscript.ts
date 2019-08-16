@@ -11,7 +11,8 @@ export default async ( conversation: Conversation, targetEmail: string ): Promis
     let transcript = '';
 
     for ( const message of messages ) {
-        transcript += handleMessage( message );
+        transcript += await handleMessage( message );
+        transcript += '\n';
     }
 
     if ( conversation.status === ConversationStatuses.closed ) {
