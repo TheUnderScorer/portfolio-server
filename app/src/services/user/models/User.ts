@@ -67,6 +67,10 @@ export default class User extends Model implements UserInterface
     @Authorized( { role: 'administrator' } )
     public ip: string;
 
+    @Column()
+    @Field()
+    public didCaptcha: boolean;
+
     @Column( {
         nullable: true
     } )

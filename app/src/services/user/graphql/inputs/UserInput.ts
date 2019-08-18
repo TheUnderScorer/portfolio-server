@@ -21,4 +21,9 @@ export default class UserInput implements Partial<User>
     } )
     @MinLength( 5 )
     public password?: string;
+
+    @Field( {
+        nullable: true
+    } )
+    public captcha?: string;
 }
