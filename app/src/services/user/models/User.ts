@@ -69,7 +69,7 @@ export default class User extends Model implements UserInterface
 
     @Column()
     @Field()
-    public didCaptcha: boolean;
+    public didCaptcha: boolean = false;
 
     @Column( {
         nullable: true

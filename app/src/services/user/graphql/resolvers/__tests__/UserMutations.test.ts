@@ -12,6 +12,12 @@ import { UserRole } from '../../../types/UserRole';
 import createMany from '../../../../../tests/factories/createMany';
 import { contextForUserTests } from '../../../../../tests/contextProviders';
 
+let captchaResult: boolean = true;
+
+jest.mock( '../../../../../common/google/recaptcha', () => ( {
+    validate: () => captchaResult,
+} ) );
+
 describe( 'graphql users resolvers', () =>
 {
     let server: ApolloServer;
@@ -37,6 +43,8 @@ describe( 'graphql users resolvers', () =>
 
     afterEach( async () =>
     {
+        captchaResult = true;
+
         await afterEveryTest( config );
     } );
 
@@ -190,6 +198,76 @@ describe( 'graphql users resolvers', () =>
 
         expect( result.email ).toEqual( input.email );
         expect( result.name ).toEqual( input.name );
+    } );
+
+    it( 'updateUserData should not change didCaptcha on validation failure', async () =>
+    {
+        captchaResult = false;
+
+        const mutation = `
+            mutation UpdateMe($user: UserInput!) {
+                updateMe(userInput: $user) {
+                    id,
+                    name,
+                    email,
+                    role,
+                }
+            }
+        `;
+
+        const input: UserInput = {
+            name:     faker.name.firstName(),
+            email:    faker.internet.email(),
+            password: faker.internet.password(),
+            captcha:  faker.random.uuid()
+        };
+
+        await graphql( {
+            schema,
+            source:         mutation,
+            variableValues: {
+                user: input
+            },
+            contextValue:   contextForUserTests( user, ip )
+        } );
+
+        await user.reload();
+
+        expect( user.didCaptcha ).toBeFalsy();
+    } );
+
+    it( 'updateUserData should set didCaptcha to true when validation succeeds', async () =>
+    {
+        const mutation = `
+            mutation UpdateMe($user: UserInput!) {
+                updateMe(userInput: $user) {
+                    id,
+                    name,
+                    email,
+                    role,
+                }
+            }
+        `;
+
+        const input: UserInput = {
+            name:     faker.name.firstName(),
+            email:    faker.internet.email(),
+            password: faker.internet.password(),
+            captcha:  faker.random.uuid()
+        };
+
+        await graphql( {
+            schema,
+            source:         mutation,
+            variableValues: {
+                user: input
+            },
+            contextValue:   contextForUserTests( user, ip )
+        } );
+
+        await user.reload();
+
+        expect( user.didCaptcha ).toBeTruthy();
     } );
 
 } );

@@ -26,4 +26,9 @@ export default class UserInput implements Partial<User>
         nullable: true
     } )
     public captcha?: string;
+
+    @Field( {
+        nullable: true,
+    } )
+    public didCaptcha?: boolean;
 }

@@ -9,6 +9,9 @@ import events from '../../../../events';
 import { getUser } from '../authorization';
 import { UserRole } from '../../types/UserRole';
 import DataLoader from '../../../../common/DataLoader';
+import { validate } from '../../../../common/google/recaptcha';
+import RequestError from '../../../../errors/RequestError';
+import { ErrorCodes } from '../../../../types/ErrorCodes';
 
 @Resolver( User )
 export default class UserResolver
@@ -16,6 +19,16 @@ export default class UserResolver
 
     private static async updateUserData( user: User, input: UserInput, loader: DataLoader<string, User> ): Promise<User>
     {
+        if ( !user.didCaptcha ) {
+            const captchaResult = await validate( input.captcha );
+
+            if ( !captchaResult ) {
+                throw new RequestError( 'Invalid captcha validation result.', ErrorCodes.InvalidCaptchaResult )
+            } else {
+                user.didCaptcha = true;
+            }
+        }
+
         const updatedUser = Object.assign( user, input );
         loader.update( updatedUser );
 

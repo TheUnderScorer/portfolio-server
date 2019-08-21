@@ -11,5 +11,6 @@ export enum ErrorCodes
     ContactFormOverload               = 'ContactFormOverload',
     CannotOpenConversation            = 'CannotOpenConversation',
     CannotOpenMoreThanOneConversation = 'CannotOpenMoreThanOneConversation',
-    MissingEmailForTranscript         = 'MissingEmailForTranscript'
+    MissingEmailForTranscript         = 'MissingEmailForTranscript',
+    InvalidCaptchaResult              = 'InvalidCaptchaResult'
 }
