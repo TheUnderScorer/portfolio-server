@@ -85,7 +85,7 @@
   "dependencies": {
     "apollo-server": "^2.7.0",
     "axios": "^0.18.0",
-    "bcrypt": "^3.0.5",
+    "bcrypt": "^5.0.0",
     "class-validator": "^0.9.1",
     "dataloader": "^1.4.0",
     "dotenv": "^7.0.0",
