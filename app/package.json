@@ -106,7 +106,7 @@
     "mysql2": "^1.6.5",
     "nodemailer": "^6.2.1",
     "sanitize-html": "^1.20.1",
-    "type-graphql": "^0.17.4",
+    "type-graphql": "^0.17.6",
     "typeorm": "^0.2.18"
   },
   "license": "ISC"
