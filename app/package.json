@@ -83,7 +83,7 @@
     "typescript": "^3.4.1"
   },
   "dependencies": {
-    "apollo-server": "^2.7.0",
+    "apollo-server": "^2.25.4",
     "axios": "^0.18.0",
     "bcrypt": "^3.0.5",
     "class-validator": "^0.9.1",
